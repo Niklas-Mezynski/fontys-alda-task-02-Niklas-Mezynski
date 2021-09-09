@@ -58,7 +58,7 @@ public class APFactory implements AbstractAPFactory {
     @Override
     public AppointmentRequest createAppointmentRequest( AppointmentData appData, LocalTime prefStart, TimePreference fallBack ) {
         //TODO return proper instance
-        return null;
+        return new AppointmentRequestImpl(appData, prefStart, fallBack);
     }
 
     @Override

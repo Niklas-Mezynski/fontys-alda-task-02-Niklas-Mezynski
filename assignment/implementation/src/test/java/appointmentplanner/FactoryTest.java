@@ -45,9 +45,14 @@ public class FactoryTest {
     @Test
     void t02createAppointmentRequest() {
         AppointmentData appointmentData = fac.createAppointmentData("Doctor", Duration.ofHours(1), Priority.MEDIUM);
-        AppointmentRequest appointmentRequest = fac.createAppointmentRequest(appointmentData, LocalTime.of(10, 30), TimePreference.EARLIEST);
-
-        assertThat(appointmentRequest).isNotNull();
+        AppointmentRequest appointmentRequest1 = fac.createAppointmentRequest(appointmentData, LocalTime.of(10, 30));
+        AppointmentRequest appointmentRequest2 = fac.createAppointmentRequest(appointmentData, TimePreference.EARLIEST);
+        AppointmentRequest appointmentRequest3 = fac.createAppointmentRequest(appointmentData, LocalTime.of(10, 30), TimePreference.LATEST);
+        SoftAssertions.assertSoftly(s -> {
+            s.assertThat(appointmentRequest1).isNotNull();
+            s.assertThat(appointmentRequest2).isNotNull();
+            s.assertThat(appointmentRequest3).isNotNull();
+        });
     }
 
 }
