@@ -22,21 +22,26 @@ public class AppointmentRequestImpl implements AppointmentRequest {
 
     @Override
     public String getDescription() {
-        return null;
+        return appData.getDescription();
     }
 
     @Override
     public Priority getPriority() {
-        return null;
+        return appData.getPriority();
     }
 
     @Override
     public LocalTime getStartTime() {
-        return null;
+        return prefStart;
     }
 
     @Override
     public AppointmentData getAppointmentData() {
-        return null;
+        return appData;
+    }
+
+    @Override
+    public TimePreference getTimePreference() {
+            return fallBack;
     }
 }
