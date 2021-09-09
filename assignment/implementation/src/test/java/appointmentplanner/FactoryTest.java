@@ -42,4 +42,12 @@ public class FactoryTest {
         });
     }
 
+    @Test
+    void t02createAppointmentRequest() {
+        AppointmentData appointmentData = fac.createAppointmentData("Doctor", Duration.ofHours(1), Priority.MEDIUM);
+        AppointmentRequest appointmentRequest = fac.createAppointmentRequest(appointmentData, LocalTime.of(10, 30), TimePreference.EARLIEST);
+
+        assertThat(appointmentRequest).isNotNull();
+    }
+
 }
