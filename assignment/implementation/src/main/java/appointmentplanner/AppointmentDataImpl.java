@@ -24,16 +24,16 @@ public class AppointmentDataImpl implements AppointmentData {
 
     @Override
     public Duration getDuration() {
-        return null;
+        return duration;
     }
 
     @Override
     public String getDescription() {
-        return null;
+        return description;
     }
 
     @Override
     public Priority getPriority() {
-        return null;
+        return priority;
     }
 }
