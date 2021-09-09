@@ -13,6 +13,10 @@ public class AppointmentDataImpl implements AppointmentData {
     private Priority priority;
 
     public AppointmentDataImpl(String description, Duration duration) {
+        if (duration.isZero() || duration.isNegative() || description == null)
+            throw new IllegalArgumentException("Duration must be positive and there must be a description");
+        if (description.equals(""))
+            throw new IllegalArgumentException("Duration must be positive and there must be a description");
         this.description = description;
         this.duration = duration;
     }
