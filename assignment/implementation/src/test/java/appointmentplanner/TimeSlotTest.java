@@ -26,4 +26,14 @@ public class TimeSlotTest {
         });
     }
 
+    @Test
+    void t02endBeforeStart() {
+        LocalDateTime localDateTimeToday09_00 = LocalDateTime.of(TestData.TODAY.getDate(), TestData.T09_00);
+        Instant instantToday09_00 = localDateTimeToday09_00.atZone(ZoneId.systemDefault()).toInstant();
+        LocalDateTime localDateTimeToday16_00 = LocalDateTime.of(TestData.TODAY.getDate(), TestData.T16_00);
+        Instant instantToday16_00 = localDateTimeToday16_00.atZone(ZoneId.systemDefault()).toInstant();
+        assertThatCode(() -> fac.between(instantToday16_00, instantToday09_00))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
 }

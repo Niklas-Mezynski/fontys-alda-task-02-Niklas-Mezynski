@@ -9,6 +9,8 @@ public class TimeSlotImpl implements TimeSlot {
     private final Instant end;
 
     public TimeSlotImpl(Instant start, Instant end) {
+        if (end.isBefore(start))
+            throw new IllegalArgumentException("End time is not allowed to be before start time");
         this.start = start;
         this.end = end;
     }
