@@ -37,7 +37,7 @@ public class APFactory implements AbstractAPFactory {
     @Override
     public LocalDayPlan createLocalDayPlan( LocalDay day, Instant start, Instant end ) {
         //TODO return proper instance
-        return null;
+        return new LocalDayPlanImpl(day, start, end);
     }
 
     public APFactory() {

@@ -55,4 +55,10 @@ public class FactoryTest {
         });
     }
 
+    @Test
+    void t03createLocalDayPlan() {
+        LocalDayPlan localDayPlan = fac.createLocalDayPlan(TestData.TODAY, TestData.T09_00, TestData.T16_00);
+        assertThat(localDayPlan).isNotNull();
+    }
+
 }
