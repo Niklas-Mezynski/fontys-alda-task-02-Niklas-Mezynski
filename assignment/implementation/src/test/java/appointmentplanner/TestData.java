@@ -47,11 +47,11 @@ public class TestData {
     static final AppointmentRequest AR6 = fac.createAppointmentRequest( DATA6, T14_30 );
     static final AppointmentRequest AR7 = fac.createAppointmentRequest( DATA7, T16_00, TimePreference.EARLIEST );
 
-    static LocalDayPlan standardDay() {
-        LocalDayPlan td = emptyWorkingDay();
+//    static LocalDayPlan standardDay() {
+//        LocalDayPlan td = emptyWorkingDay();
 //        addApps( td, AR1, AR2, AR3, AR4, AR5, AR6, AR7 );
-        return td;
-    }
+//        return td;
+//    }
 
     static LocalDayPlan emptyWorkingDay() {
         return fac.createLocalDayPlan( TODAY, LocalTime.of( 8, 30 ), LocalTime.of( 17, 30 ) );
