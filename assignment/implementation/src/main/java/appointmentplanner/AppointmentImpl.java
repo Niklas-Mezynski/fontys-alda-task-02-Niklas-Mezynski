@@ -10,6 +10,18 @@ import java.time.Instant;
 
 public class AppointmentImpl implements Appointment {
 
+    private final Instant start;
+    private final Instant end;
+    private final AppointmentData appData;
+    private final AppointmentRequest appReq;
+
+    public AppointmentImpl(Instant start, Instant end, AppointmentData appData, AppointmentRequest appReq) {
+        this.start = start;
+        this.end = end;
+        this.appData = appData;
+        this.appReq = appReq;
+    }
+
     /**
      * An appointment always has some no-zero length.
      *
@@ -17,7 +29,7 @@ public class AppointmentImpl implements Appointment {
      */
     @Override
     public Duration getDuration() {
-        return null;
+        return appData.getDuration();
     }
 
     /**
@@ -27,7 +39,7 @@ public class AppointmentImpl implements Appointment {
      */
     @Override
     public String getDescription() {
-        return null;
+        return appData.getDescription();
     }
 
     /**
@@ -37,7 +49,7 @@ public class AppointmentImpl implements Appointment {
      */
     @Override
     public Priority getPriority() {
-        return null;
+        return appData.getPriority();
     }
 
     /**
@@ -47,7 +59,7 @@ public class AppointmentImpl implements Appointment {
      */
     @Override
     public AppointmentData getAppointmentData() {
-        return null;
+        return appData;
     }
 
     /**
@@ -57,7 +69,7 @@ public class AppointmentImpl implements Appointment {
      */
     @Override
     public AppointmentRequest getRequest() {
-        return null;
+        return appReq;
     }
 
     /**
@@ -68,7 +80,7 @@ public class AppointmentImpl implements Appointment {
      */
     @Override
     public Instant getStart() {
-        return null;
+        return start;
     }
 
     /**
@@ -79,6 +91,6 @@ public class AppointmentImpl implements Appointment {
      */
     @Override
     public Instant getEnd() {
-        return null;
+        return end;
     }
 }
