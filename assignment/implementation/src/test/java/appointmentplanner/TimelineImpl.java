@@ -36,7 +36,7 @@ public class TimelineImpl implements Timeline {
      */
     @Override
     public Instant start() {
-        return null;
+        return start;
     }
 
     /**
@@ -46,7 +46,7 @@ public class TimelineImpl implements Timeline {
      */
     @Override
     public Instant end() {
-        return null;
+        return end;
     }
 
     /**
