@@ -5,17 +5,20 @@ import appointmentplanner.api.LocalDayPlan;
 import appointmentplanner.api.Timeline;
 
 import java.time.Instant;
+import java.time.temporal.TemporalAmount;
 
 public class LocalDayPlanImpl implements LocalDayPlan {
 
     private final LocalDay day;
-    private final Instant start;
-    private final Instant end;
+    private final Timeline timeline;
+
+    public LocalDayPlanImpl(LocalDay day, Timeline timeline) {
+        this.day = day;
+        this.timeline = timeline;
+    }
 
     public LocalDayPlanImpl(LocalDay day, Instant start, Instant end) {
-        this.day = day;
-        this.start = start;
-        this.end = end;
+        this(day, new TimelineImpl(start, end));
     }
 
     /**
@@ -25,7 +28,7 @@ public class LocalDayPlanImpl implements LocalDayPlan {
      */
     @Override
     public LocalDay getDay() {
-        return null;
+        return this.day;
     }
 
     /**
@@ -35,7 +38,7 @@ public class LocalDayPlanImpl implements LocalDayPlan {
      */
     @Override
     public Instant earliest() {
-        return null;
+        return timeline.start();
     }
 
     /**
@@ -45,7 +48,7 @@ public class LocalDayPlanImpl implements LocalDayPlan {
      */
     @Override
     public Instant tooLate() {
-        return null;
+        return timeline.end();
     }
 
     /**
@@ -55,6 +58,6 @@ public class LocalDayPlanImpl implements LocalDayPlan {
      */
     @Override
     public Timeline getTimeline() {
-        return null;
+        return timeline;
     }
 }
