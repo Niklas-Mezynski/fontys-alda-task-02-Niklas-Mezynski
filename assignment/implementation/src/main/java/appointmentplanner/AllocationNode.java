@@ -12,10 +12,25 @@ public class AllocationNode implements TimeSlot {
     private Instant start;
     private Instant end;
 
+    /**
+     * Constructor used for appointment slots
+     * @param start
+     * @param end
+     * @param appointmentData
+     */
     public AllocationNode(Instant start, Instant end, AppointmentData appointmentData) {
         this.start = start;
         this.end = end;
         this.appData = appointmentData;
+    }
+
+    /**
+     * Constructor used for free TimeSlots
+     * @param start
+     * @param end
+     */
+    public AllocationNode(Instant start, Instant end) {
+        this(start, end, null);
     }
 
     @Override
