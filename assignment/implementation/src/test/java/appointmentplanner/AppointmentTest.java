@@ -10,7 +10,7 @@ public class AppointmentTest {
 
     @Test
     void t01createAppointment() {
-        AppointmentImpl appointment = new AppointmentImpl(TestData.TODAY.at(9, 30), TestData.TODAY.at(10, 0), TestData.DATA2, TestData.AR2);
+        AppointmentImpl appointment = new AppointmentImpl(TestData.TODAY.at(9, 30), TestData.TODAY.at(10, 0), TestData.AR2);
 
         SoftAssertions.assertSoftly(s -> {
             s.assertThat(appointment.getAppointmentData()).isEqualTo(TestData.DATA2);
