@@ -10,10 +10,12 @@ public class AllocationNode implements TimeSlot {
     protected AllocationNode prev;
     private AppointmentData appData;
     private Instant start;
+    private Instant end;
 
-    public AllocationNode(AppointmentData appointmentData, Instant start) {
-        this.appData = appointmentData;
+    public AllocationNode(Instant start, Instant end, AppointmentData appointmentData) {
         this.start = start;
+        this.end = end;
+        this.appData = appointmentData;
     }
 
     @Override
@@ -23,7 +25,7 @@ public class AllocationNode implements TimeSlot {
 
     @Override
     public Instant getEnd() {
-        return start.plus(appData.getDuration());
+        return end;
     }
 
     public AppointmentData getPurpose() {
