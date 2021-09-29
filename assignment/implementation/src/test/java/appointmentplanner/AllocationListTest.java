@@ -9,13 +9,13 @@ public class AllocationListTest {
 
     @Test
     void t01creation() {
-        AllocationList allocationList = new AllocationList(new AllocationNode(TestData.TODAY.ofLocalTime(TestData.T08_30), TestData.TODAY.ofLocalTime(TestData.T17_30)));
+        AllocationList allocationList = new AllocationList(new AllocationNode(new TimeSlotImpl(TestData.TODAY.ofLocalTime(TestData.T08_30), TestData.TODAY.ofLocalTime(TestData.T17_30))));
         assertThat(allocationList).isNotNull();
     }
 
     @Test
     void t02creationWithData() {
-        ThrowingCallable code = () -> new AllocationList(new AllocationNode(TestData.TODAY.ofLocalTime(TestData.T08_30), TestData.TODAY.ofLocalTime(TestData.T17_30), TestData.DATA1));
+        ThrowingCallable code = () -> new AllocationList(new AllocationNode(new TimeSlotImpl(TestData.TODAY.ofLocalTime(TestData.T08_30), TestData.TODAY.ofLocalTime(TestData.T17_30)), TestData.DATA1));
         assertThatCode(code).isInstanceOf(IllegalArgumentException.class);
     }
 
