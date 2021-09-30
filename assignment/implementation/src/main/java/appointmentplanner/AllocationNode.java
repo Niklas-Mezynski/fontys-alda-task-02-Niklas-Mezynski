@@ -9,14 +9,16 @@ public class AllocationNode implements TimeSlot {
     protected AllocationNode next;
     protected AllocationNode prev;
     private AppointmentData appData;
-    private TimeSlot timeSlot;
+    private Instant start;
+    private Instant end;
 
     /**
      * Constructor used for appointment slots
      * @param appointmentData
      */
-    public AllocationNode(TimeSlot timeSlot, AppointmentData appointmentData) {
-        this.timeSlot = timeSlot;
+    public AllocationNode(Instant start, Instant end, AppointmentData appointmentData) {
+        this.start = start;
+        this.end = end;
         this.appData = appointmentData;
     }
 
@@ -25,21 +27,29 @@ public class AllocationNode implements TimeSlot {
      * @param start
      * @param end
      */
-    public AllocationNode(TimeSlot timeSlot) {
-        this(timeSlot, null);
+    public AllocationNode(Instant start, Instant end) {
+        this(start, end, null);
     }
 
     @Override
     public Instant getStart() {
-        return timeSlot.getStart();
+        return start;
     }
 
     @Override
     public Instant getEnd() {
-        return timeSlot.getEnd();
+        return end;
     }
 
     public AppointmentData getPurpose() {
         return appData;
+    }
+
+    public void setStart(Instant start) {
+        this.start = start;
+    }
+
+    public void setEnd(Instant end) {
+        this.end = end;
     }
 }
