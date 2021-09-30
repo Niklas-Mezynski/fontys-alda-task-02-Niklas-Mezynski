@@ -11,12 +11,21 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public class TimelineImpl implements Timeline {
-    private final Instant start;
-    private final Instant end;
+    private AllocationNode head;
+    private AllocationNode tail;
+    private int nrOfAppointments;
 
     public TimelineImpl(Instant start, Instant end) {
-        this.start = start;
-        this.end = end;
+        if (!start.isBefore(end))
+            throw new IllegalArgumentException("start time must be before end time");
+
+        this.nrOfAppointments = 0;
+        this.head = new AllocationNode(start, start);
+        this.tail = new AllocationNode(end, end);
+
+        AllocationNode initialAllocation = new AllocationNode(start, end);
+        this.head.next = initialAllocation;
+        this.tail.prev = initialAllocation;
     }
 
     /**
@@ -36,7 +45,7 @@ public class TimelineImpl implements Timeline {
      */
     @Override
     public Instant start() {
-        return start;
+        return head.start;
     }
 
     /**
@@ -46,7 +55,7 @@ public class TimelineImpl implements Timeline {
      */
     @Override
     public Instant end() {
-        return end;
+        return tail.end;
     }
 
     /**
@@ -234,5 +243,58 @@ public class TimelineImpl implements Timeline {
     @Override
     public List<TimeSlot> getMatchingFreeSlotsOfDuration(Duration minLength, List<Timeline> other) {
         return null;
+    }
+
+
+    /**
+     * This inner class is there
+     */
+    public class AllocationNode implements TimeSlot {
+        protected AllocationNode next;
+        protected AllocationNode prev;
+        private AppointmentData appData;
+        private Instant start;
+        private Instant end;
+
+        /**
+         * Constructor used for appointment slots
+         * @param appointmentData
+         */
+        public AllocationNode(Instant start, Instant end, AppointmentData appointmentData) {
+            this.start = start;
+            this.end = end;
+            this.appData = appointmentData;
+        }
+
+        /**
+         * Constructor used for free TimeSlots
+         * @param start
+         * @param end
+         */
+        public AllocationNode(Instant start, Instant end) {
+            this(start, end, null);
+        }
+
+        @Override
+        public Instant getStart() {
+            return start;
+        }
+
+        @Override
+        public Instant getEnd() {
+            return end;
+        }
+
+        public AppointmentData getPurpose() {
+            return appData;
+        }
+
+        public void setStart(Instant start) {
+            this.start = start;
+        }
+
+        public void setEnd(Instant end) {
+            this.end = end;
+        }
     }
 }
