@@ -5,12 +5,14 @@ import appointmentplanner.api.*;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalTime;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
-public class TimelineImpl implements Timeline {
+import static java.util.Spliterator.ORDERED;
+
+public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationNode> {
     private AllocationNode head;
     private AllocationNode tail;
     private int nrOfAppointments;
@@ -96,6 +98,20 @@ public class TimelineImpl implements Timeline {
      */
     @Override
     public Optional<Appointment> addAppointment(LocalDay forDay, AppointmentData appointment, LocalTime startTime) {
+        Instant startTimeInstant = forDay.ofLocalTime(startTime);
+        Optional<AllocationNode> first = stream()
+                .filter(allocation ->
+                        allocation.appData == null &&
+                                allocation.start.isBefore(startTimeInstant) &&
+                                allocation.end.isAfter(startTimeInstant)
+                )
+                .findFirst();
+
+        if (first.isPresent()) {
+            AllocationNode freeAllocationNode = first.get();
+            AllocationNode appointmentNode = new AllocationNode(startTimeInstant, startTimeInstant.plus(appointment.getDuration()), appointment);
+
+        }
         return Optional.empty();
     }
 
@@ -245,6 +261,21 @@ public class TimelineImpl implements Timeline {
         return null;
     }
 
+    /**
+     * Returns an iterator over elements of type {@code T}.
+     *
+     * @return an Iterator.
+     */
+    @Override
+    public Iterator<AllocationNode> iterator() {
+        return new TimelineIterator(this);
+    }
+
+    Stream<AllocationNode> stream() {
+        Spliterator<AllocationNode> spliterator = Spliterators.spliteratorUnknownSize(iterator(), ORDERED);
+        return StreamSupport.stream(spliterator, false);
+    }
+
 
     /**
      * This inner class is there
@@ -258,6 +289,7 @@ public class TimelineImpl implements Timeline {
 
         /**
          * Constructor used for appointment slots
+         *
          * @param appointmentData
          */
         public AllocationNode(Instant start, Instant end, AppointmentData appointmentData) {
@@ -268,6 +300,7 @@ public class TimelineImpl implements Timeline {
 
         /**
          * Constructor used for free TimeSlots
+         *
          * @param start
          * @param end
          */
@@ -295,6 +328,44 @@ public class TimelineImpl implements Timeline {
 
         public void setEnd(Instant end) {
             this.end = end;
+        }
+    }
+
+    private class TimelineIterator implements Iterator<AllocationNode> {
+
+        private AllocationNode current;
+        private final TimelineImpl timeline;
+
+        public TimelineIterator(TimelineImpl timeline) {
+            this.current = timeline.head;
+            this.timeline = timeline;
+        }
+
+        /**
+         * Returns {@code true} if the iteration has more elements.
+         * (In other words, returns {@code true} if {@link #next} would
+         * return an element rather than throwing an exception.)
+         *
+         * @return {@code true} if the iteration has more elements
+         */
+        @Override
+        public boolean hasNext() {
+            return current.next != timeline.tail;
+        }
+
+        /**
+         * Returns the next element in the iteration.
+         *
+         * @return the next element in the iteration
+         * @throws NoSuchElementException if the iteration has no more elements
+         */
+        @Override
+        public AllocationNode next() {
+            if (!hasNext()) {
+                throw new NoSuchElementException("The list has reached it's end");
+            }
+            current = current.next;
+            return current;
         }
     }
 }
