@@ -99,20 +99,20 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
     @Override
     public Optional<Appointment> addAppointment(LocalDay forDay, AppointmentData appointment, LocalTime startTime) {
         Instant startTimeInstant = forDay.ofLocalTime(startTime);
-        stream().peek(allocationNode -> System.out.println(allocationNode.getPurpose().getDescription()));
-//        Optional<AllocationNode> first = stream()
-//                .filter(allocation ->
-//                        allocation.appData == null &&
-//                                allocation.start.isBefore(startTimeInstant) &&
-//                                allocation.end.isAfter(startTimeInstant)
-//                )
-//                .findFirst();
-//
-//        if (first.isPresent()) {
-//            AllocationNode freeAllocationNode = first.get();
-//            AllocationNode appointmentNode = new AllocationNode(startTimeInstant, startTimeInstant.plus(appointment.getDuration()), appointment);
-//
-//        }
+//        stream().peek(allocationNode -> System.out.println(allocationNode.getPurpose().getDescription()));
+        Optional<AllocationNode> first = stream()
+                .filter(allocation ->
+                        allocation.appData == null &&
+                                allocation.start.isBefore(startTimeInstant) &&
+                                allocation.end.isAfter(startTimeInstant)
+                )
+                .findFirst();
+
+        if (first.isPresent()) {
+            AllocationNode freeAllocationNode = first.get();
+
+
+        }
         return Optional.empty();
     }
 
@@ -262,6 +262,42 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
         return null;
     }
 
+
+    /**
+     * Helper method to insert new nodes with in a specific time range.
+     * @param freeNodeToAddApp0 the free allocationNode the where the new allocation should be inserted
+     * @param start the start time of the new node
+     * @param end the end time of the new node
+     * @return returns the newly inserted allocationNode which will be placed between (including) the start and end time
+     */
+    private AllocationNode insertNode(AllocationNode freeNodeToAddApp0, Instant start, Instant end) {
+        //Creating two new nodes so that we can split the freeNodeToAddApp0 into
+        // a free node, then the allocated node and in the end a new free node
+        AllocationNode newAllocation1 = new AllocationNode(start, end);
+        AllocationNode newFreeAllocationNodeAfter2 = new AllocationNode(newAllocation1.end, freeNodeToAddApp0.end);
+
+        //Rearanging the linked list structure
+        newFreeAllocationNodeAfter2.next = freeNodeToAddApp0.next;
+        newFreeAllocationNodeAfter2.prev = newAllocation1;
+        newAllocation1.next = newFreeAllocationNodeAfter2;
+        newAllocation1.prev = freeNodeToAddApp0;
+        freeNodeToAddApp0.next = newAllocation1;
+
+        //Setting the correct start and end times for the new Nodes
+        freeNodeToAddApp0.setEnd(newAllocation1.start);
+
+        //Checking if the free timeslot on the left side has a duration of 0 and deleting it if necessary
+        if (freeNodeToAddApp0.getDuration().equals(Duration.ZERO)) {
+            freeNodeToAddApp0.prev.next = freeNodeToAddApp0.next;
+        }
+        //Checking if the free timeslot on the right side has a duration of 0 and deleting it if necessary
+        if (newFreeAllocationNodeAfter2.getDuration().equals(Duration.ZERO)) {
+            newAllocation1.next = newFreeAllocationNodeAfter2.next;
+        }
+
+        return newAllocation1;
+    }
+
     /**
      * Returns an iterator over elements of type {@code T}.
      *
@@ -314,6 +350,10 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
             return start;
         }
 
+        public Duration getDuration() {
+            return Duration.between(start, end);
+        }
+
         @Override
         public Instant getEnd() {
             return end;
@@ -329,6 +369,10 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
 
         public void setEnd(Instant end) {
             this.end = end;
+        }
+
+        public void setAppData(AppointmentData appData) {
+            this.appData = appData;
         }
     }
 
