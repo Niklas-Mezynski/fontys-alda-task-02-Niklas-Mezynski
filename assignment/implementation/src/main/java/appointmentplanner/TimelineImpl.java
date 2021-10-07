@@ -86,6 +86,12 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
      */
     @Override
     public Optional<Appointment> addAppointment(LocalDay forDay, AppointmentData appointment, TimePreference timepreference) {
+        //If no time preference is specified, no appointment can be added
+        if (timepreference == null || timepreference == TimePreference.UNSPECIFIED) {
+            return Optional.empty();
+        }
+
+
         return Optional.empty();
     }
 
@@ -102,7 +108,6 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
     public Optional<Appointment> addAppointment(LocalDay forDay, AppointmentData appointment, LocalTime startTime) {
         Instant startTimeInstant = forDay.ofLocalTime(startTime);
         Instant endTimeInstant = forDay.ofLocalTime(startTime).plus(appointment.getDuration());
-//        stream().forEach(allocationNode -> System.out.println(allocationNode.getEnd()));
         Optional<AllocationNode> first = stream()
                 .filter(allocationNode ->
                         allocationNode.getPurpose() == null &&
@@ -110,7 +115,6 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
                                 (allocationNode.getEnd().isAfter(endTimeInstant) || allocationNode.getEnd().equals(endTimeInstant))
                 )
                 .findFirst();
-
         if (first.isPresent()) {
             AllocationNode freeAllocationNode = first.get();
             AllocationNode appAllocationNode = insertNode(freeAllocationNode, startTimeInstant, endTimeInstant);
@@ -120,6 +124,14 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
             return Optional.of(appointment1);
         }
         return Optional.empty();
+    }
+
+    private void printAllAppointments() {
+        System.out.println("----Appointment list start---");
+        for (AllocationNode ad:this) {
+            System.out.println(ad.getDuration() + " | " + ad.appData);
+        }
+        System.out.println("----End---");
     }
 
     /**
@@ -290,12 +302,13 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
         freeNodeToAddApp0.next = newAllocation1;
 
         //Setting the correct start and end times for the new Nodes
-        freeNodeToAddApp0.setEnd(newAllocation1.start);
+        freeNodeToAddApp0.end = newAllocation1.start;
 
         //Checking if the free timeslot on the left side has a duration of 0 and deleting it if necessary
         if (freeNodeToAddApp0.getDuration().equals(Duration.ZERO)) {
             freeNodeToAddApp0.prev.next = freeNodeToAddApp0.next;
         }
+
         //Checking if the free timeslot on the right side has a duration of 0 and deleting it if necessary
         if (newFreeAllocationNodeAfter2.getDuration().equals(Duration.ZERO)) {
             newAllocation1.next = newFreeAllocationNodeAfter2.next;

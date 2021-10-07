@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import java.time.Instant;
 import java.time.LocalTime;
 import java.util.Map;
 import java.util.Optional;
@@ -70,6 +71,13 @@ public class TimelineTest {
             "11:10", TestData.T11_10
     );
 
+    private final Map<String, Instant> instantMap = Map.of(
+            "08:30", TODAY.ofLocalTime(TestData.T08_30),
+            "09:00", TODAY.ofLocalTime(TestData.T09_00),
+            "10:30", TODAY.ofLocalTime(TestData.T10_30),
+            "11:10", TODAY.ofLocalTime(TestData.T11_10)
+    );
+
     @CsvSource({
             "DATA0,08:30,FALSE",
             "DATA1,09:00,TRUE",
@@ -78,10 +86,18 @@ public class TimelineTest {
             "DATA5,11:10,TRUE",
     })
     @ParameterizedTest
-    void t04addAppointmentFixedTimeDifferentScenarios(String appDataString, String localTimeString, boolean shouldWork) {
+    void t04addAppointmentFixedTime(String appDataString, String localTimeString, boolean shouldWork) {
         AppointmentData appointmentData = appointmentDataMap.get(appDataString);
         LocalTime localTime = localTimeMap.get(localTimeString);
         Optional<Appointment> appointment = getTimelineWithAppointments().addAppointment(TODAY, appointmentData, localTime);
         assertThat(appointment.isPresent()).isEqualTo(shouldWork);
     }
+
+//    @CsvSource({
+//            "",
+//    })
+//    @ParameterizedTest
+//    void t05addAppointmentWithTimePreference(String appDataString, String localTimeString, String outputAppStartString, String outputAppEndString) {
+//
+//    }
 }
