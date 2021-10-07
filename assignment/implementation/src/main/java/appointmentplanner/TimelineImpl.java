@@ -99,19 +99,20 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
     @Override
     public Optional<Appointment> addAppointment(LocalDay forDay, AppointmentData appointment, LocalTime startTime) {
         Instant startTimeInstant = forDay.ofLocalTime(startTime);
-        Optional<AllocationNode> first = stream()
-                .filter(allocation ->
-                        allocation.appData == null &&
-                                allocation.start.isBefore(startTimeInstant) &&
-                                allocation.end.isAfter(startTimeInstant)
-                )
-                .findFirst();
-
-        if (first.isPresent()) {
-            AllocationNode freeAllocationNode = first.get();
-            AllocationNode appointmentNode = new AllocationNode(startTimeInstant, startTimeInstant.plus(appointment.getDuration()), appointment);
-
-        }
+        stream().peek(allocationNode -> System.out.println(allocationNode.getPurpose().getDescription()));
+//        Optional<AllocationNode> first = stream()
+//                .filter(allocation ->
+//                        allocation.appData == null &&
+//                                allocation.start.isBefore(startTimeInstant) &&
+//                                allocation.end.isAfter(startTimeInstant)
+//                )
+//                .findFirst();
+//
+//        if (first.isPresent()) {
+//            AllocationNode freeAllocationNode = first.get();
+//            AllocationNode appointmentNode = new AllocationNode(startTimeInstant, startTimeInstant.plus(appointment.getDuration()), appointment);
+//
+//        }
         return Optional.empty();
     }
 

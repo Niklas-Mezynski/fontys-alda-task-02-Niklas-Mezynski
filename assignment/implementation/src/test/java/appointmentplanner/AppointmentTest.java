@@ -14,7 +14,7 @@ public class AppointmentTest {
 
         SoftAssertions.assertSoftly(s -> {
             s.assertThat(appointment.getAppointmentData()).isEqualTo(TestData.DATA2);
-            s.assertThat(appointment.getDescription()).isEqualTo("app2 30 min @9:30");
+            s.assertThat(appointment.getDescription()).isEqualTo("app2 30 min @10:30");
             s.assertThat(appointment.getDuration()).isEqualTo(TestData.D30);
             s.assertThat(appointment.getPriority()).isEqualTo(Priority.LOW);
             s.assertThat(appointment.getEnd()).isEqualTo(TestData.TODAY.at(10, 0));
