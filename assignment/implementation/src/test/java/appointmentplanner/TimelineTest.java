@@ -49,8 +49,8 @@ public class TimelineTest {
         Optional<Appointment> appointment = timeline.addAppointment(TODAY, TestData.DATA3, TestData.T10_30);
         assertThat(appointment.isEmpty()).isFalse();
         SoftAssertions.assertSoftly(s -> {
-            s.assertThat(appointment.get().getStart()).isEqualTo(TestData.T10_30);
-            s.assertThat(appointment.get().getAppointmentData()).isSameAs(TestData.DATA3);
+            s.assertThat(appointment.get().getStart()).isEqualTo(TODAY.ofLocalTime(TestData.T10_30));
+            s.assertThat(appointment.get().getAppointmentData()).isEqualTo(TestData.DATA3);
         });
     }
 

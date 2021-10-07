@@ -26,6 +26,8 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
         this.tail = new AllocationNode(end, end);
 
         AllocationNode initialAllocation = new AllocationNode(start, end);
+        initialAllocation.prev = this.head;
+        initialAllocation.next = this.tail;
         this.head.next = initialAllocation;
         this.tail.prev = initialAllocation;
     }
@@ -99,19 +101,23 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
     @Override
     public Optional<Appointment> addAppointment(LocalDay forDay, AppointmentData appointment, LocalTime startTime) {
         Instant startTimeInstant = forDay.ofLocalTime(startTime);
-//        stream().peek(allocationNode -> System.out.println(allocationNode.getPurpose().getDescription()));
+        Instant endTimeInstant = forDay.ofLocalTime(startTime).plus(appointment.getDuration());
+//        stream().forEach(allocationNode -> System.out.println(allocationNode.getEnd()));
         Optional<AllocationNode> first = stream()
-                .filter(allocation ->
-                        allocation.appData == null &&
-                                allocation.start.isBefore(startTimeInstant) &&
-                                allocation.end.isAfter(startTimeInstant)
+                .filter(allocationNode ->
+                        allocationNode.getPurpose() == null &&
+                                (allocationNode.getStart().isBefore(startTimeInstant) || allocationNode.getStart().equals(startTimeInstant)) &&
+                                (allocationNode.getEnd().isAfter(endTimeInstant) || allocationNode.getEnd().equals(endTimeInstant))
                 )
                 .findFirst();
 
         if (first.isPresent()) {
             AllocationNode freeAllocationNode = first.get();
-
-
+            AllocationNode appAllocationNode = insertNode(freeAllocationNode, startTimeInstant, endTimeInstant);
+            AppointmentRequestImpl appointmentRequest = new AppointmentRequestImpl(appointment, startTime, TimePreference.UNSPECIFIED);
+            AppointmentImpl appointment1 = new AppointmentImpl(startTimeInstant, endTimeInstant, appointmentRequest);
+            appAllocationNode.setAppData(appointment1);
+            return Optional.of(appointment1);
         }
         return Optional.empty();
     }
