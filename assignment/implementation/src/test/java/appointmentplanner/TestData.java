@@ -20,7 +20,9 @@ public class TestData {
     static final LocalTime T10_00 = LocalTime.of( 10, 0 );
     static final LocalTime T10_30 = LocalTime.of( 10, 30 );
     static final LocalTime T10_45 = LocalTime.of( 10, 45 );
+    static final LocalTime T11_00 = LocalTime.of( 11, 0 );
     static final LocalTime T11_10 = LocalTime.of( 11, 10 );
+    static final LocalTime T14_00 = LocalTime.of( 14, 0);
     static final LocalTime T14_30 = LocalTime.of( 14, 30 );
     static final LocalTime T15_00 = LocalTime.of( 15, 0 );
     static final LocalTime T15_15 = LocalTime.of( 15, 15 );

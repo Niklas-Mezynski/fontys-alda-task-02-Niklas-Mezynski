@@ -2,9 +2,12 @@ package appointmentplanner;
 
 import appointmentplanner.api.Appointment;
 import appointmentplanner.api.AppointmentData;
+import appointmentplanner.api.TimePreference;
 import appointmentplanner.api.Timeline;
+import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.api.ThrowableAssert;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -61,21 +64,37 @@ public class TimelineTest {
             "DATA2", TestData.DATA2,
             "DATA3", TestData.DATA3,
             "DATA4", TestData.DATA4,
-            "DATA5", TestData.DATA5
+            "DATA5", TestData.DATA5,
+            "DATA6", TestData.DATA6,
+            "DATA7", TestData.DATA7
     );
 
     private final Map<String, LocalTime> localTimeMap = Map.of(
             "08:30", TestData.T08_30,
             "09:00", TestData.T09_00,
             "10:30", TestData.T10_30,
-            "11:10", TestData.T11_10
+            "11:10", TestData.T11_10,
+            "14:30", TestData.T14_30,
+            "16:00", TestData.T16_00
     );
 
     private final Map<String, Instant> instantMap = Map.of(
             "08:30", TODAY.ofLocalTime(TestData.T08_30),
             "09:00", TODAY.ofLocalTime(TestData.T09_00),
             "10:30", TODAY.ofLocalTime(TestData.T10_30),
-            "11:10", TODAY.ofLocalTime(TestData.T11_10)
+            "11:00", TODAY.ofLocalTime(TestData.T11_00),
+            "11:10", TODAY.ofLocalTime(TestData.T11_10),
+            "14:00", TODAY.ofLocalTime(TestData.T14_00),
+            "14:30", TODAY.ofLocalTime(TestData.T14_30),
+            "15:45", TODAY.ofLocalTime(TestData.T15_45),
+            "16:00", TODAY.ofLocalTime(TestData.T16_00)
+    );
+
+    private final Map<String, TimePreference> timePrefMap = Map.of(
+            "EARLIEST", TimePreference.EARLIEST,
+            "LATEST", TimePreference.LATEST,
+            "EARLIEST_AFTER", TimePreference.EARLIEST_AFTER,
+            "LATEST_BEFORE", TimePreference.LATEST_BEFORE
     );
 
     @CsvSource({
@@ -84,6 +103,7 @@ public class TimelineTest {
             "DATA3,10:30,TRUE",
             "DATA2,10:30,FALSE",
             "DATA5,11:10,TRUE",
+            "DATA7,16:00,FALSE"
     })
     @ParameterizedTest
     void t04addAppointmentFixedTime(String appDataString, String localTimeString, boolean shouldWork) {
@@ -93,11 +113,22 @@ public class TimelineTest {
         assertThat(appointment.isPresent()).isEqualTo(shouldWork);
     }
 
-//    @CsvSource({
-//            "",
-//    })
-//    @ParameterizedTest
-//    void t05addAppointmentWithTimePreference(String appDataString, String localTimeString, String outputAppStartString, String outputAppEndString) {
-//
-//    }
+    @CsvSource({
+            "DATA1, EARLIEST, 09:00",
+            "DATA5, EARLIEST, 11:00",
+            "DATA3, LATEST, 15:45",
+    })
+    @ParameterizedTest
+    void t05addAppointmentWithTimePreference(String appDataString, String timePrefString, String outputAppStartString) {
+        AppointmentData appointmentData = appointmentDataMap.get(appDataString);
+        TimePreference timePreference = timePrefMap.get(timePrefString);
+        Instant expectedStart = instantMap.get(outputAppStartString);
+        Optional<Appointment> appointment = getTimelineWithAppointments().addAppointment(TODAY, appointmentData, timePreference);
+        Assumptions.assumeTrue(appointment.isPresent());
+        SoftAssertions.assertSoftly(s -> {
+            s.assertThat(appointment.get().getStart()).isEqualTo(expectedStart);
+            s.assertThat(appointment.get().getRequest().getTimePreference()).isEqualTo(timePreference);
+        });
+
+    }
 }
