@@ -238,7 +238,8 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
      */
     @Override
     public Stream<Appointment> appointmentStream() {
-        return null;
+        return stream().filter(allocationNode -> allocationNode.appData != null)
+                .map(allocationNode -> allocationNode.appData);
     }
 
     /**
@@ -394,7 +395,7 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
     class AllocationNode implements TimeSlot {
         protected AllocationNode next;
         protected AllocationNode prev;
-        private AppointmentData appData;
+        private Appointment appData;
         private Instant start;
         private Instant end;
 
@@ -403,7 +404,7 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
          *
          * @param appointmentData the appointment data of the allocated TimeSlot
          */
-        public AllocationNode(Instant start, Instant end, AppointmentData appointmentData) {
+        public AllocationNode(Instant start, Instant end, Appointment appointmentData) {
             this.start = start;
             this.end = end;
             this.appData = appointmentData;
@@ -433,7 +434,7 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
             return end;
         }
 
-        public AppointmentData getPurpose() {
+        public Appointment getPurpose() {
             return appData;
         }
 
@@ -445,7 +446,7 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
             this.end = end;
         }
 
-        public void setAppData(AppointmentData appData) {
+        public void setAppData(Appointment appData) {
             this.appData = appData;
         }
 
