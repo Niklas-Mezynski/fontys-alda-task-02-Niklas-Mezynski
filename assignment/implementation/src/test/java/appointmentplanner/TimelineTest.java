@@ -17,6 +17,7 @@ import java.time.LocalTime;
 import java.util.Map;
 import java.util.Optional;
 
+import static appointmentplanner.TestData.DATA5;
 import static appointmentplanner.TestData.TODAY;
 import static org.assertj.core.api.Assertions.*;
 
@@ -94,7 +95,8 @@ public class TimelineTest {
             "EARLIEST", TimePreference.EARLIEST,
             "LATEST", TimePreference.LATEST,
             "EARLIEST_AFTER", TimePreference.EARLIEST_AFTER,
-            "LATEST_BEFORE", TimePreference.LATEST_BEFORE
+            "LATEST_BEFORE", TimePreference.LATEST_BEFORE,
+            "UNSPECIFIED", TimePreference.UNSPECIFIED
     );
 
     @CsvSource({
@@ -130,5 +132,30 @@ public class TimelineTest {
             s.assertThat(appointment.get().getRequest().getTimePreference()).isEqualTo(timePreference);
         });
 
+    }
+
+    @CsvSource({
+            "DATA1, UNSPECIFIED",
+            "DATA5, LATEST_BEFORE",
+            "DATA3, EARLIEST_AFTER",
+    })
+    @ParameterizedTest
+    void t06addAppointmentWithTimePreferenceFailing(String appDataString, String timePrefString) {
+        AppointmentData appointmentData = appointmentDataMap.get(appDataString);
+        TimePreference timePreference = timePrefMap.get(timePrefString);
+        Optional<Appointment> appointment = getTimelineWithAppointments().addAppointment(TODAY, appointmentData, timePreference);
+        assertThat(appointment.isEmpty()).isTrue();
+    }
+
+    @Test
+    void t07addAppointmentWithTimePreferenceFailing() {
+        Timeline timelineWithAppointments = getTimelineWithAppointments();
+        timelineWithAppointments.addAppointment(TODAY, DATA5, TestData.T11_10);
+        Optional<Appointment> appointment1 = timelineWithAppointments.addAppointment(TODAY, DATA5, TimePreference.EARLIEST);
+        Optional<Appointment> appointment2 = timelineWithAppointments.addAppointment(TODAY, DATA5, TimePreference.LATEST);
+        SoftAssertions.assertSoftly(s -> {
+            s.assertThat(appointment1.isEmpty()).isTrue();
+            s.assertThat(appointment2.isEmpty()).isTrue();
+        });
     }
 }
