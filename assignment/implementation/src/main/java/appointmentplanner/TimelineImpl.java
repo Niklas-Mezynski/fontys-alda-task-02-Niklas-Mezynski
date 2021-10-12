@@ -87,11 +87,48 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
     @Override
     public Optional<Appointment> addAppointment(LocalDay forDay, AppointmentData appointment, TimePreference timepreference) {
         //If no time preference is specified, no appointment can be added
-        if (timepreference == null || timepreference == TimePreference.UNSPECIFIED) {
+        if (!(timepreference == TimePreference.EARLIEST || timepreference == TimePreference.LATEST)) {
             return Optional.empty();
         }
+        switch (timepreference) {
+            case EARLIEST:
+                //Find the earliest possible place for the appointment
+                Optional<AllocationNode> optFirstFreeNode = stream().filter(allocationNode ->
+                        allocationNode.appData == null &&
+                                (allocationNode.start.plus(appointment.getDuration()).isBefore(allocationNode.end) ||
+                                        allocationNode.start.plus(appointment.getDuration()).equals(allocationNode.end))
+                ).findFirst();
+                if (optFirstFreeNode.isEmpty()) {
+                    return Optional.empty();
+                }
+                AllocationNode firstFreeNode = optFirstFreeNode.get();
+                AllocationNode newNodeForTheAppointment = insertNode(firstFreeNode, firstFreeNode.start, firstFreeNode.start.plus(appointment.getDuration()));
+                AppointmentRequest appointmentRequest = new AppointmentRequestImpl(appointment, null, timepreference);
+                AppointmentImpl newAppointment = new AppointmentImpl(newNodeForTheAppointment.start, newNodeForTheAppointment.end, appointmentRequest);
+                newNodeForTheAppointment.appData = newAppointment;
+                nrOfAppointments++;
+                return Optional.of(newAppointment);
+            case LATEST:
+                //Do the latest possible place for the appointment
+                Optional<AllocationNode> optLastFreeNode = reversedStream().filter(allocationNode ->
+                        allocationNode.appData == null &&
+                                (allocationNode.end.minus(appointment.getDuration()).isAfter(allocationNode.start) ||
+                                        allocationNode.end.minus(appointment.getDuration()).equals(allocationNode.start))
+                ).findFirst();
+                if (optLastFreeNode.isEmpty()) {
+                    return Optional.empty();
+                }
+                AllocationNode lastFreeNode = optLastFreeNode.get();
+                AllocationNode newNodeForTheApp = insertNode(lastFreeNode, lastFreeNode.end.minus(appointment.getDuration()), lastFreeNode.end);
+                AppointmentRequest appRequest = new AppointmentRequestImpl(appointment, null, timepreference);
+                AppointmentImpl newApp = new AppointmentImpl(newNodeForTheApp.start, newNodeForTheApp.end, appRequest);
+                newNodeForTheApp.appData = newApp;
+                nrOfAppointments++;
+                return Optional.of(newApp);
 
+        }
 
+        //If nothing found, return an empty Optional
         return Optional.empty();
     }
 
@@ -108,6 +145,8 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
     public Optional<Appointment> addAppointment(LocalDay forDay, AppointmentData appointment, LocalTime startTime) {
         Instant startTimeInstant = forDay.ofLocalTime(startTime);
         Instant endTimeInstant = forDay.ofLocalTime(startTime).plus(appointment.getDuration());
+
+        //Finding out if there is a free allocation for given time by streaming and filtering the linked list.
         Optional<AllocationNode> first = stream()
                 .filter(allocationNode ->
                         allocationNode.getPurpose() == null &&
@@ -115,21 +154,26 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
                                 (allocationNode.getEnd().isAfter(endTimeInstant) || allocationNode.getEnd().equals(endTimeInstant))
                 )
                 .findFirst();
+
+        //IF the free slot was found -> Calling the insertNode() to rearrange the list and creating the appointment
         if (first.isPresent()) {
             AllocationNode freeAllocationNode = first.get();
             AllocationNode appAllocationNode = insertNode(freeAllocationNode, startTimeInstant, endTimeInstant);
             AppointmentRequestImpl appointmentRequest = new AppointmentRequestImpl(appointment, startTime, TimePreference.UNSPECIFIED);
             AppointmentImpl appointment1 = new AppointmentImpl(startTimeInstant, endTimeInstant, appointmentRequest);
             appAllocationNode.setAppData(appointment1);
+            nrOfAppointments++;
             return Optional.of(appointment1);
         }
+
+        //If slot is allocated -> return an empty optional
         return Optional.empty();
     }
 
     private void printAllAppointments() {
         System.out.println("----Appointment list start---");
         for (AllocationNode ad:this) {
-            System.out.println(ad.getDuration() + " | " + ad.appData);
+            System.out.println(ad);
         }
         System.out.println("----End---");
     }
@@ -306,12 +350,14 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
 
         //Checking if the free timeslot on the left side has a duration of 0 and deleting it if necessary
         if (freeNodeToAddApp0.getDuration().equals(Duration.ZERO)) {
-            freeNodeToAddApp0.prev.next = freeNodeToAddApp0.next;
+            freeNodeToAddApp0.prev.next = newAllocation1;
+            newAllocation1.prev = freeNodeToAddApp0.prev;
         }
 
         //Checking if the free timeslot on the right side has a duration of 0 and deleting it if necessary
         if (newFreeAllocationNodeAfter2.getDuration().equals(Duration.ZERO)) {
             newAllocation1.next = newFreeAllocationNodeAfter2.next;
+            newAllocation1.next.prev = newAllocation1;
         }
 
         return newAllocation1;
@@ -327,8 +373,17 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
         return new TimelineIterator(this);
     }
 
+    public Iterator<AllocationNode> reversedIterator() {
+        return new TimelineReverseIterator(this);
+    }
+
     Stream<AllocationNode> stream() {
         Spliterator<AllocationNode> spliterator = Spliterators.spliteratorUnknownSize(iterator(), ORDERED);
+        return StreamSupport.stream(spliterator, false);
+    }
+
+    Stream<AllocationNode> reversedStream() {
+        Spliterator<AllocationNode> spliterator = Spliterators.spliteratorUnknownSize(reversedIterator(), ORDERED);
         return StreamSupport.stream(spliterator, false);
     }
 
@@ -336,7 +391,7 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
     /**
      * This inner class is there
      */
-    public class AllocationNode implements TimeSlot {
+    class AllocationNode implements TimeSlot {
         protected AllocationNode next;
         protected AllocationNode prev;
         private AppointmentData appData;
@@ -346,7 +401,7 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
         /**
          * Constructor used for appointment slots
          *
-         * @param appointmentData
+         * @param appointmentData the appointment data of the allocated TimeSlot
          */
         public AllocationNode(Instant start, Instant end, AppointmentData appointmentData) {
             this.start = start;
@@ -393,6 +448,14 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
         public void setAppData(AppointmentData appData) {
             this.appData = appData;
         }
+
+        @Override
+        public String toString() {
+            return "AllocationNode{" +
+                    ", start=" + start +
+                    ", end=" + end +
+                    '}';
+        }
     }
 
     private class TimelineIterator implements Iterator<AllocationNode> {
@@ -429,6 +492,45 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
                 throw new NoSuchElementException("The list has reached it's end");
             }
             current = current.next;
+            return current;
+        }
+    }
+
+
+    private class TimelineReverseIterator implements Iterator<AllocationNode> {
+
+        private AllocationNode current;
+        private final TimelineImpl timeline;
+
+        public TimelineReverseIterator(TimelineImpl timeline) {
+            this.current = timeline.tail;
+            this.timeline = timeline;
+        }
+
+        /**
+         * Returns {@code true} if the iteration has more elements.
+         * (In other words, returns {@code true} if {@link #next} would
+         * return an element rather than throwing an exception.)
+         *
+         * @return {@code true} if the iteration has more elements
+         */
+        @Override
+        public boolean hasNext() {
+            return current.prev != timeline.head;
+        }
+
+        /**
+         * Returns the next element in the iteration.
+         *
+         * @return the next element in the iteration
+         * @throws NoSuchElementException if the iteration has no more elements
+         */
+        @Override
+        public AllocationNode next() {
+            if (!hasNext()) {
+                throw new NoSuchElementException("The list has reached it's end");
+            }
+            current = current.prev;
             return current;
         }
     }
