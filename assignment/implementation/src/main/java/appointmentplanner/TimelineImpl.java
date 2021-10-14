@@ -39,7 +39,7 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
      */
     @Override
     public int getNrOfAppointments() {
-        return 0;
+        return nrOfAppointments;
     }
 
     /**
@@ -161,7 +161,7 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
             AllocationNode appAllocationNode = insertNode(freeAllocationNode, startTimeInstant, endTimeInstant);
             AppointmentRequest appointmentRequest = new AppointmentRequestImpl(appointment, startTime, TimePreference.UNSPECIFIED);
             Appointment appointment1 = new AppointmentImpl(startTimeInstant, endTimeInstant, appointmentRequest);
-            appAllocationNode.setAppData(appointment1);
+            appAllocationNode.appData = appointment1;
             nrOfAppointments++;
             return Optional.of(appointment1);
         }
@@ -257,6 +257,7 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
         for (AllocationNode node: this) {
             if (node.appData == appointment) {
                 removeAllocatedNode(node);
+                nrOfAppointments--;
                 return appointment.getRequest();
             }
         }
@@ -521,18 +522,6 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
 
         public Appointment getPurpose() {
             return appData;
-        }
-
-        public void setStart(Instant start) {
-            this.start = start;
-        }
-
-        public void setEnd(Instant end) {
-            this.end = end;
-        }
-
-        public void setAppData(Appointment appData) {
-            this.appData = appData;
         }
 
         @Override

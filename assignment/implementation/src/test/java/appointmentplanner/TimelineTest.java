@@ -209,7 +209,15 @@ public class TimelineTest {
             s.assertThat(appointmentRequests.contains(appointment1.get().getRequest()));
             s.assertThat(appointmentRequests.contains(appointment2.get().getRequest()));
         });
+    }
 
+    @Test
+    void t12noOfAppointments() {
+        Timeline timelineWithAppointments = getTimelineWithAppointments();
+        timelineWithAppointments.addAppointment(TODAY, DATA8, T09_00);
+        timelineWithAppointments.addAppointment(TODAY, DATA7, T11_10);
+        timelineWithAppointments.removeAppointments(appointment -> appointment.getDuration().compareTo(D30) > 0);
+        assertThat(timelineWithAppointments.getNrOfAppointments()).isEqualTo(3);
     }
 
 
