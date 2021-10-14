@@ -11,6 +11,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 import java.time.Instant;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -193,11 +194,21 @@ public class TimelineTest {
         Assumptions.assumeTrue(appointment.isPresent());
         AppointmentRequest appointmentRequest = timelineWithAppointments.removeAppointment(appointment.get());
         Assumptions.assumeTrue(appointmentRequest != null);
-        assertThat(appointmentRequest.getAppointmentData()).isEqualTo(DATA3);
+        assertThat(appointmentRequest).isEqualTo(appointment.get().getRequest());
     }
 
     @Test
     void t11removeMultipleApps() {
+        Timeline timelineWithAppointments = getTimelineWithAppointments();
+        Optional<Appointment> appointment1 = timelineWithAppointments.addAppointment(TODAY, DATA8, T09_00);
+        Optional<Appointment> appointment2 = timelineWithAppointments.addAppointment(TODAY, DATA7, T11_10);
+        Assumptions.assumeTrue(appointment1.isPresent() && appointment2.isPresent());
+        List<AppointmentRequest> appointmentRequests = timelineWithAppointments.removeAppointments(appointment -> appointment.getDuration().compareTo(D30) > 0);
+        SoftAssertions.assertSoftly(s -> {
+            s.assertThat(appointmentRequests.size()).isEqualTo(3);
+            s.assertThat(appointmentRequests.contains(appointment1.get().getRequest()));
+            s.assertThat(appointmentRequests.contains(appointment2.get().getRequest()));
+        });
 
     }
 

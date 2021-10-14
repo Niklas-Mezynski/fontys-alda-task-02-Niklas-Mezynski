@@ -42,6 +42,7 @@ public class TestData {
     static final AppointmentData DATA5 = fac.createAppointmentData( "app5 200 min @11:10", D200, Priority.HIGH );
     static final AppointmentData DATA6 = fac.createAppointmentData( "app6 30 min @14:30", D30, Priority.LOW );
     static final AppointmentData DATA7 = fac.createAppointmentData( "app7 90 min @16:00", D90, Priority.LOW );
+    static final AppointmentData DATA8 = fac.createAppointmentData( "app8 80 min @09:00", D80, Priority.LOW );
     static final AppointmentRequest AR1 = fac.createAppointmentRequest( DATA1, T09_00, TimePreference.UNSPECIFIED );
     static final AppointmentRequest AR2 = fac.createAppointmentRequest( DATA2, T10_30 );
     static final AppointmentRequest AR3 = fac.createAppointmentRequest( DATA3, T10_30 );
