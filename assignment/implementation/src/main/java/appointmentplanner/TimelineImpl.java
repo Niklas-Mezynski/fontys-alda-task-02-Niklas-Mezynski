@@ -254,11 +254,9 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
      */
     @Override
     public AppointmentRequest removeAppointment(Appointment appointment) {
-        printAllAppointments();
         for (AllocationNode node: this) {
             if (node.appData == appointment) {
                 removeAllocatedNode(node);
-                printAllAppointments();
                 return appointment.getRequest();
             }
         }
@@ -273,7 +271,13 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
      */
     @Override
     public List<AppointmentRequest> removeAppointments(Predicate<Appointment> filter) {
-        return null;
+        List<AppointmentRequest> appRequests = new ArrayList<>();
+        appointmentStream().filter(filter)
+                .forEach(appointment -> {
+                    removeAppointment(appointment);
+                    appRequests.add(appointment.getRequest());
+                });
+        return appRequests;
     }
 
 
@@ -287,14 +291,14 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
         node.appData = null;
 
         //Check if the prev node is also null and combine both nodes if needed.
-        if (node.prev.appData == null) {
+        if (node.prev.appData == null && node.prev != head) {
             node.start = node.prev.start;
             node.prev = node.prev.prev;
             node.prev.next = node;
         }
 
         //Check if the right side is also null and combine both when needed.
-        if (node.next.appData == null) {
+        if (node.next.appData == null && node.next != tail) {
             node.end = node.next.end;
             node.next = node.next.next;
             node.next.prev = node;
