@@ -1,9 +1,6 @@
 package appointmentplanner;
 
-import appointmentplanner.api.Appointment;
-import appointmentplanner.api.AppointmentData;
-import appointmentplanner.api.TimePreference;
-import appointmentplanner.api.Timeline;
+import appointmentplanner.api.*;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.api.ThrowableAssert;
@@ -17,8 +14,7 @@ import java.time.LocalTime;
 import java.util.Map;
 import java.util.Optional;
 
-import static appointmentplanner.TestData.DATA5;
-import static appointmentplanner.TestData.TODAY;
+import static appointmentplanner.TestData.*;
 import static org.assertj.core.api.Assertions.*;
 
 public class TimelineTest {
@@ -190,6 +186,20 @@ public class TimelineTest {
         });
     }
 
+    @Test
+    void t10removeSingleApp() {
+        Timeline timelineWithAppointments = getTimelineWithAppointments();
+        Optional<Appointment> appointment = timelineWithAppointments.addAppointment(TODAY, DATA3, T10_30);
+        Assumptions.assumeTrue(appointment.isPresent());
+        AppointmentRequest appointmentRequest = timelineWithAppointments.removeAppointment(appointment.get());
+        Assumptions.assumeTrue(appointmentRequest != null);
+        assertThat(appointmentRequest.getAppointmentData()).isEqualTo(DATA3);
+    }
+
+    @Test
+    void t11removeMultipleApps() {
+
+    }
 
 
 

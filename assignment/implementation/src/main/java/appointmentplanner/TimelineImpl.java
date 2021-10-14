@@ -254,6 +254,14 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
      */
     @Override
     public AppointmentRequest removeAppointment(Appointment appointment) {
+        printAllAppointments();
+        for (AllocationNode node: this) {
+            if (node.appData == appointment) {
+                removeAllocatedNode(node);
+                printAllAppointments();
+                return appointment.getRequest();
+            }
+        }
         return null;
     }
 
@@ -266,6 +274,31 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
     @Override
     public List<AppointmentRequest> removeAppointments(Predicate<Appointment> filter) {
         return null;
+    }
+
+
+    /**
+     * Helper method to remove an appointment and restructure the linked list
+     * @param node which should contain the appointment
+     */
+    private void removeAllocatedNode(AllocationNode node) {
+        //First remove the appointment
+
+        node.appData = null;
+
+        //Check if the prev node is also null and combine both nodes if needed.
+        if (node.prev.appData == null) {
+            node.start = node.prev.start;
+            node.prev = node.prev.prev;
+            node.prev.next = node;
+        }
+
+        //Check if the right side is also null and combine both when needed.
+        if (node.next.appData == null) {
+            node.end = node.next.end;
+            node.next = node.next.next;
+            node.next.prev = node;
+        }
     }
 
     /**
@@ -440,7 +473,7 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
     /**
      * This inner class is there
      */
-    class AllocationNode implements TimeSlot {
+    protected class AllocationNode implements TimeSlot {
         protected AllocationNode next;
         protected AllocationNode prev;
         private Appointment appData;
@@ -503,6 +536,7 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
             return "AllocationNode{" +
                     ", start=" + start +
                     ", end=" + end +
+                    ", appointment=" + appData +
                     '}';
         }
     }
