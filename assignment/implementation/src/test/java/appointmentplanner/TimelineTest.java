@@ -74,6 +74,7 @@ public class TimelineTest {
             "08:30", TestData.T08_30,
             "09:00", TestData.T09_00,
             "10:30", TestData.T10_30,
+            "10:45", TestData.T10_45,
             "11:10", TestData.T11_10,
             "14:30", TestData.T14_30,
             "16:00", TestData.T16_00
@@ -158,4 +159,38 @@ public class TimelineTest {
             s.assertThat(appointment2.isEmpty()).isTrue();
         });
     }
+
+    @CsvSource({
+            "DATA0,08:30,EARLIEST_AFTER,09:00",
+            "DATA1,09:00,LATEST_BEFORE,09:00",
+            "DATA3,10:45,EARLIEST_AFTER,11:00",
+            "DATA3,10:45,LATEST_BEFORE,10:30",
+    })
+    @ParameterizedTest
+    void t08addAppointmentWithFallback(String appDataString, String localTimeString, String fallbackTimePrefString, String expOutputStartTime) {
+        AppointmentData appointmentData = appointmentDataMap.get(appDataString);
+        TimePreference fallbackTimePref = timePrefMap.get(fallbackTimePrefString);
+        LocalTime startTime = localTimeMap.get(localTimeString);
+        Instant expectedStart = instantMap.get(expOutputStartTime);
+        Optional<Appointment> appointment = getTimelineWithAppointments().addAppointment(TODAY, appointmentData, startTime, fallbackTimePref);
+        Assumptions.assumeTrue(appointment.isPresent());
+        assertThat(appointment.get().getStart()).isEqualTo(expectedStart);
+    }
+
+    @Test
+    void t09addAppWithFallbackNoFreeSlot() {
+        Timeline timelineWithAppointments = getTimelineWithAppointments();
+        timelineWithAppointments.addAppointment(TODAY, DATA5, TestData.T11_10);
+        LocalTime localTime = localTimeMap.get("10:30");
+        Optional<Appointment> appointment1 = timelineWithAppointments.addAppointment(TODAY, DATA5, localTime, TimePreference.EARLIEST_AFTER);
+        Optional<Appointment> appointment2 = timelineWithAppointments.addAppointment(TODAY, DATA5, localTime, TimePreference.LATEST_BEFORE);
+        SoftAssertions.assertSoftly(s -> {
+            s.assertThat(appointment1.isEmpty()).isTrue();
+            s.assertThat(appointment2.isEmpty()).isTrue();
+        });
+    }
+
+
+
+
 }

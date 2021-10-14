@@ -104,7 +104,7 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
                 AllocationNode firstFreeNode = optFirstFreeNode.get();
                 AllocationNode newNodeForTheAppointment = insertNode(firstFreeNode, firstFreeNode.start, firstFreeNode.start.plus(appointment.getDuration()));
                 AppointmentRequest appointmentRequest = new AppointmentRequestImpl(appointment, null, timepreference);
-                AppointmentImpl newAppointment = new AppointmentImpl(newNodeForTheAppointment.start, newNodeForTheAppointment.end, appointmentRequest);
+                Appointment newAppointment = new AppointmentImpl(newNodeForTheAppointment.start, newNodeForTheAppointment.end, appointmentRequest);
                 newNodeForTheAppointment.appData = newAppointment;
                 nrOfAppointments++;
                 return Optional.of(newAppointment);
@@ -121,7 +121,7 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
                 AllocationNode lastFreeNode = optLastFreeNode.get();
                 AllocationNode newNodeForTheApp = insertNode(lastFreeNode, lastFreeNode.end.minus(appointment.getDuration()), lastFreeNode.end);
                 AppointmentRequest appRequest = new AppointmentRequestImpl(appointment, null, timepreference);
-                AppointmentImpl newApp = new AppointmentImpl(newNodeForTheApp.start, newNodeForTheApp.end, appRequest);
+                Appointment newApp = new AppointmentImpl(newNodeForTheApp.start, newNodeForTheApp.end, appRequest);
                 newNodeForTheApp.appData = newApp;
                 nrOfAppointments++;
                 return Optional.of(newApp);
@@ -159,8 +159,8 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
         if (first.isPresent()) {
             AllocationNode freeAllocationNode = first.get();
             AllocationNode appAllocationNode = insertNode(freeAllocationNode, startTimeInstant, endTimeInstant);
-            AppointmentRequestImpl appointmentRequest = new AppointmentRequestImpl(appointment, startTime, TimePreference.UNSPECIFIED);
-            AppointmentImpl appointment1 = new AppointmentImpl(startTimeInstant, endTimeInstant, appointmentRequest);
+            AppointmentRequest appointmentRequest = new AppointmentRequestImpl(appointment, startTime, TimePreference.UNSPECIFIED);
+            Appointment appointment1 = new AppointmentImpl(startTimeInstant, endTimeInstant, appointmentRequest);
             appAllocationNode.setAppData(appointment1);
             nrOfAppointments++;
             return Optional.of(appointment1);
@@ -192,6 +192,54 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
      */
     @Override
     public Optional<Appointment> addAppointment(LocalDay forDay, AppointmentData appointment, LocalTime startTime, TimePreference fallback) {
+        //Try to add the appointment at the fixed time
+        Optional<Appointment> appWFixedTime = addAppointment(forDay, appointment, startTime);
+        if (appWFixedTime.isPresent()) {
+            return appWFixedTime;
+        }
+
+        //If the appointment can't be added at the fixed timeslot, try to use the fallback time preference
+        switch (fallback) {
+            case EARLIEST_AFTER:
+                //Try to find the earliest available slot after the given time
+
+                //Find the first free allocation node after the specified time, which fits the app duration
+                Optional<AllocationNode> first = stream().filter(allocationNode -> allocationNode.appData == null &&
+                                (allocationNode.start.isAfter(forDay.ofLocalTime(startTime)) || allocationNode.start.equals(forDay.ofLocalTime(startTime))) &&
+                                allocationNode.getDuration().compareTo(appointment.getDuration()) >= 0)
+                        .findFirst();
+
+                //If it was found, add the appointment to the beginning of this node
+                if (first.isPresent()) {
+                    AllocationNode earliestPossNode = insertNode(first.get(), first.get().getStart(), first.get().getStart().plus(appointment.getDuration()));
+                    AppointmentRequest appointmentRequest = new AppointmentRequestImpl(appointment, startTime, fallback);
+                    Appointment appointment1 = new AppointmentImpl(earliestPossNode.getStart(), earliestPossNode.getEnd(), appointmentRequest);
+                    earliestPossNode.appData = appointment1;
+                    nrOfAppointments++;
+                    return Optional.of(appointment1);
+                }
+
+            case LATEST_BEFORE:
+                //Try to find the latest available slot before the given time
+
+                //Find the first free allocation node before the specified time, which fits the app duration
+                Optional<AllocationNode> first1 = reversedStream().filter(allocationNode -> allocationNode.appData == null &&
+                        (allocationNode.end.isBefore(forDay.ofLocalTime(startTime)) || allocationNode.end.equals(forDay.ofLocalTime(startTime))) &&
+                                allocationNode.getDuration().compareTo(appointment.getDuration()) >= 0)
+                        .findFirst();
+
+                //If it was found, add the appointment to the end of this node
+                if (first1.isPresent()) {
+                    AllocationNode earliestPossNode = insertNode(first1.get(), first1.get().getEnd().minus(appointment.getDuration()), first1.get().getEnd());
+                    AppointmentRequest appointmentRequest = new AppointmentRequestImpl(appointment, startTime, fallback);
+                    Appointment appointment1 = new AppointmentImpl(earliestPossNode.getStart(), earliestPossNode.getEnd(), appointmentRequest);
+                    earliestPossNode.appData = appointment1;
+                    nrOfAppointments++;
+                    return Optional.of(appointment1);
+                }
+        }
+
+        //If nothing was found, return an empty optional
         return Optional.empty();
     }
 
