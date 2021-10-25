@@ -401,7 +401,7 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
      */
     @Override
     public List<TimeSlot> getGapsFittingSmallestFirst(Duration duration) {
-        return null;
+        return getGapsFitting(duration).stream().sorted(Comparator.comparing(TimeSlot::duration)).collect(Collectors.toList());
     }
 
     /**
@@ -412,7 +412,7 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
      */
     @Override
     public List<TimeSlot> getGapsFittingLargestFirst(Duration duration) {
-        return null;
+        return getGapsFitting(duration).stream().sorted((a,b) -> b.duration().compareTo(a.duration())).collect(Collectors.toList());
     }
 
     /**
