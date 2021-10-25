@@ -385,7 +385,12 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
      */
     @Override
     public List<TimeSlot> getGapsFittingReversed(Duration duration) {
-        return null;
+        return reversedStream()
+                .filter(allocationNode -> allocationNode.appData == null &&
+                        allocationNode.getDuration().equals(duration) ||
+                        duration.minus(allocationNode.getDuration()).isNegative())
+                .map(allocationNode -> (TimeSlot) allocationNode)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -512,8 +517,8 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
         /**
          * Constructor used for free TimeSlots
          *
-         * @param start
-         * @param end
+         * @param start Start time of the allocated TimeSlot
+         * @param end End time of the allocated TimeSlot
          */
         public AllocationNode(Instant start, Instant end) {
             this(start, end, null);

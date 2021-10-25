@@ -207,8 +207,8 @@ public class TimelineTest {
         List<AppointmentRequest> appointmentRequests = timelineWithAppointments.removeAppointments(appointment -> appointment.getDuration().compareTo(D30) > 0);
         SoftAssertions.assertSoftly(s -> {
             s.assertThat(appointmentRequests.size()).isEqualTo(3);
-            s.assertThat(appointmentRequests.contains(appointment1.get().getRequest()));
-            s.assertThat(appointmentRequests.contains(appointment2.get().getRequest()));
+            s.assertThat(appointmentRequests.contains(appointment1.get().getRequest())).isTrue();
+            s.assertThat(appointmentRequests.contains(appointment2.get().getRequest())).isTrue();
         });
     }
 
@@ -228,9 +228,7 @@ public class TimelineTest {
         Optional<Appointment> appointment2 = timelineWithAppointments.addAppointment(TODAY, DATA8, T11_10);
         Assumptions.assumeTrue(appointment1.isPresent() && appointment2.isPresent());
         List<Appointment> appointments = timelineWithAppointments.findAppointments(appointment -> appointment.getAppointmentData().equals(DATA8));
-        SoftAssertions.assertSoftly(s -> {
-            s.assertThat(appointments).containsExactlyInAnyOrder(appointment1.get(), appointment2.get());
-        });
+        assertThat(appointments).containsExactlyInAnyOrder(appointment1.get(), appointment2.get());
     }
 
     @Test
@@ -260,7 +258,7 @@ public class TimelineTest {
     @Test
     void t16getGapsFittingReversed() {
         Timeline timelineWithAppointments = getTimelineWithAppointments();
-        List<TimeSlot> gapsFitting = timelineWithAppointments.getGapsFitting(D90);
+        List<TimeSlot> gapsFitting = timelineWithAppointments.getGapsFittingReversed(D90);
         Assumptions.assumeTrue(gapsFitting.size() == 2);
         SoftAssertions.assertSoftly(s -> {
             s.assertThat(gapsFitting.get(0).duration()).isEqualTo(Duration.ofMinutes(210));
