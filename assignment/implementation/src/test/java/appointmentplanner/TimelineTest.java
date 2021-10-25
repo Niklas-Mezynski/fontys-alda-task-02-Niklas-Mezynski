@@ -266,4 +266,14 @@ public class TimelineTest {
         });
     }
 
+    @Test
+    void t17canAddAppointmentOfDuration() {
+        Timeline timelineWithAppointments = getTimelineWithAppointments();
+        timelineWithAppointments.addAppointment(TODAY, DATA5, T11_10);
+        SoftAssertions.assertSoftly(s -> {
+            s.assertThat(timelineWithAppointments.canAddAppointmentOfDuration(D90)).isTrue();
+            s.assertThat(timelineWithAppointments.canAddAppointmentOfDuration(D200)).isFalse();
+        });
+    }
+
 }
