@@ -298,4 +298,25 @@ public class TimelineTest {
         });
     }
 
+    @Test
+    void t20getMatchingFreeSlotsOfDuration() {
+        Timeline timeline1 = getTimelineWithAppointments();
+        Timeline timeline2 = getTimelineWithAppointments();
+        Timeline timeline3 = getTimelineWithAppointments();
+        timeline2.addAppointment(TODAY, DATA3, T10_30);
+        timeline3.addAppointment(TODAY, DATA1, T09_00);
+        timeline3.addAppointment(TODAY, DATA1, T14_00);
+        List<Timeline> otherTimelines = List.of(timeline2, timeline3);
+        List<TimeSlot> freeSlots = timeline1.getMatchingFreeSlotsOfDuration(D30, otherTimelines);
+        Assumptions.assumeTrue(freeSlots.size() == 3);
+        SoftAssertions.assertSoftly(s -> {
+            s.assertThat(freeSlots.get(0).getStart()).isEqualTo(TODAY.ofLocalTime(T09_00));
+            s.assertThat(freeSlots.get(0).getEnd()).isEqualTo(TODAY.ofLocalTime(T10_30));
+            s.assertThat(freeSlots.get(1).getStart()).isEqualTo(TODAY.ofLocalTime(T11_00));
+            s.assertThat(freeSlots.get(1).getEnd()).isEqualTo(TODAY.ofLocalTime(T14_00));
+            s.assertThat(freeSlots.get(2).getStart()).isEqualTo(TODAY.ofLocalTime(T15_00));
+            s.assertThat(freeSlots.get(2).getEnd()).isEqualTo(TODAY.ofLocalTime(T15_30));
+        });
+    }
+
 }

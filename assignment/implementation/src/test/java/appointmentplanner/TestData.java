@@ -26,8 +26,9 @@ public class TestData {
     static final LocalTime T14_30 = LocalTime.of( 14, 30 );
     static final LocalTime T15_00 = LocalTime.of( 15, 0 );
     static final LocalTime T15_15 = LocalTime.of( 15, 15 );
+    static final LocalTime T15_30 = LocalTime.of( 15, 30 );
     static final LocalTime T15_45 = LocalTime.of( 15, 45 );
-    static final LocalTime T16_00 = LocalTime.of( 16, 00 );
+    static final LocalTime T16_00 = LocalTime.of( 16, 0 );
     static final LocalTime T17_30 = LocalTime.of( 17, 30 );
     static final Duration D15 = Duration.ofMinutes( 15 );
     static final Duration D30 = Duration.ofMinutes( 30 );

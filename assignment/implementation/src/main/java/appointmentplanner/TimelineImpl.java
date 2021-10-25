@@ -425,7 +425,11 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
      */
     @Override
     public List<TimeSlot> getMatchingFreeSlotsOfDuration(Duration minLength, List<Timeline> other) {
-        return null;
+        List<TimeSlot> finalTimeSlots = new ArrayList<>();
+
+
+
+        return finalTimeSlots;
     }
 
 
