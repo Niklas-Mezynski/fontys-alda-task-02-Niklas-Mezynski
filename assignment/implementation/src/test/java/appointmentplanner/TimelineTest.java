@@ -276,4 +276,26 @@ public class TimelineTest {
         });
     }
 
+    @Test
+    void t18getGapsFittingSmallestFirst() {
+        Timeline timelineWithAppointments = getTimelineWithAppointments();
+        List<TimeSlot> gapsFitting = timelineWithAppointments.getGapsFittingSmallestFirst(D90);
+        Assumptions.assumeTrue(gapsFitting.size() == 2);
+        SoftAssertions.assertSoftly(s -> {
+            s.assertThat(gapsFitting.get(0).duration()).isEqualTo(Duration.ofMinutes(105));
+            s.assertThat(gapsFitting.get(1).duration()).isEqualTo(Duration.ofMinutes(210));
+        });
+    }
+
+    @Test
+    void t19getGapsFittingLargestFirst() {
+        Timeline timelineWithAppointments = getTimelineWithAppointments();
+        List<TimeSlot> gapsFitting = timelineWithAppointments.getGapsFittingLargestFirst(D90);
+        Assumptions.assumeTrue(gapsFitting.size() == 2);
+        SoftAssertions.assertSoftly(s -> {
+            s.assertThat(gapsFitting.get(0).duration()).isEqualTo(Duration.ofMinutes(210));
+            s.assertThat(gapsFitting.get(1).duration()).isEqualTo(Duration.ofMinutes(105));
+        });
+    }
+
 }

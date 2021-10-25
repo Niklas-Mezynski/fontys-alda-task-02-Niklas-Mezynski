@@ -372,7 +372,7 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
      */
     @Override
     public boolean canAddAppointmentOfDuration(Duration duration) {
-        return false;
+        return !getGapsFitting(duration).isEmpty();
     }
 
     /**
