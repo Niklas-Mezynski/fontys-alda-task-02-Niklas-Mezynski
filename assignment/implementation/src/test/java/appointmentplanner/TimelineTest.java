@@ -230,7 +230,19 @@ public class TimelineTest {
         SoftAssertions.assertSoftly(s -> {
             s.assertThat(appointments).containsExactlyInAnyOrder(appointment1.get(), appointment2.get());
         });
+    }
 
+    @Test
+    void t14containsAppointment() {
+        Timeline timelineWithAppointments = getTimelineWithAppointments();
+        Optional<Appointment> appointment1 = timelineWithAppointments.addAppointment(TODAY, DATA8, T09_00);
+        Optional<Appointment> appointment2 = timelineWithAppointments.addAppointment(TODAY, DATA8, T11_10);
+        Assumptions.assumeTrue(appointment1.isPresent() && appointment2.isPresent());
+        timelineWithAppointments.removeAppointment(appointment2.get());
+        SoftAssertions.assertSoftly(s -> {
+            s.assertThat(timelineWithAppointments.contains(appointment1.get())).isTrue();
+            s.assertThat(timelineWithAppointments.contains(appointment2.get())).isFalse();
+        });
     }
 
 }

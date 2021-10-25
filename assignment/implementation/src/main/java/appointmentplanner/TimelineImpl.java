@@ -341,7 +341,8 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
      */
     @Override
     public boolean contains(Appointment appointment) {
-        return false;
+        Optional<Appointment> first = appointmentStream().filter(app -> app.equals(appointment)).findFirst();
+        return first.isPresent();
     }
 
     /**
