@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalTime;
 import java.util.List;
@@ -242,6 +243,28 @@ public class TimelineTest {
         SoftAssertions.assertSoftly(s -> {
             s.assertThat(timelineWithAppointments.contains(appointment1.get())).isTrue();
             s.assertThat(timelineWithAppointments.contains(appointment2.get())).isFalse();
+        });
+    }
+
+    @Test
+    void t15gapsFitting() {
+        Timeline timelineWithAppointments = getTimelineWithAppointments();
+        List<TimeSlot> gapsFitting = timelineWithAppointments.getGapsFitting(D90);
+        Assumptions.assumeTrue(gapsFitting.size() == 2);
+        SoftAssertions.assertSoftly(s -> {
+            s.assertThat(gapsFitting.get(0).duration()).isEqualTo(Duration.ofMinutes(105));
+            s.assertThat(gapsFitting.get(1).duration()).isEqualTo(Duration.ofMinutes(210));
+        });
+    }
+
+    @Test
+    void t16getGapsFittingReversed() {
+        Timeline timelineWithAppointments = getTimelineWithAppointments();
+        List<TimeSlot> gapsFitting = timelineWithAppointments.getGapsFitting(D90);
+        Assumptions.assumeTrue(gapsFitting.size() == 2);
+        SoftAssertions.assertSoftly(s -> {
+            s.assertThat(gapsFitting.get(0).duration()).isEqualTo(Duration.ofMinutes(210));
+            s.assertThat(gapsFitting.get(1).duration()).isEqualTo(Duration.ofMinutes(105));
         });
     }
 

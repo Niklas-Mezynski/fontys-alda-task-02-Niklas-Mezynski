@@ -174,7 +174,7 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
     private void printAllAppointments() {
         System.out.println("----Appointment list start---");
         StringBuilder prefix = new StringBuilder();
-        for (AllocationNode ad:this) {
+        for (AllocationNode ad : this) {
             System.out.println(prefix.toString() + ad);
             prefix.append("\t");
         }
@@ -227,7 +227,7 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
 
                 //Find the first free allocation node before the specified time, which fits the app duration
                 Optional<AllocationNode> first1 = reversedStream().filter(allocationNode -> allocationNode.appData == null &&
-                        (allocationNode.end.isBefore(forDay.ofLocalTime(startTime)) || allocationNode.end.equals(forDay.ofLocalTime(startTime))) &&
+                                (allocationNode.end.isBefore(forDay.ofLocalTime(startTime)) || allocationNode.end.equals(forDay.ofLocalTime(startTime))) &&
                                 allocationNode.getDuration().compareTo(appointment.getDuration()) >= 0)
                         .findFirst();
 
@@ -257,7 +257,7 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
      */
     @Override
     public AppointmentRequest removeAppointment(Appointment appointment) {
-        for (AllocationNode node: this) {
+        for (AllocationNode node : this) {
             if (node.appData == appointment) {
                 removeAllocatedNode(node);
                 nrOfAppointments--;
@@ -287,6 +287,7 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
 
     /**
      * Helper method to remove an appointment and restructure the linked list
+     *
      * @param node which should contain the appointment
      */
     private void removeAllocatedNode(AllocationNode node) {
@@ -355,7 +356,12 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
      */
     @Override
     public List<TimeSlot> getGapsFitting(Duration duration) {
-        return null;
+        return stream()
+                .filter(allocationNode -> allocationNode.appData == null &&
+                        allocationNode.getDuration().equals(duration) ||
+                        duration.minus(allocationNode.getDuration()).isNegative())
+                .map(allocationNode -> (TimeSlot) allocationNode)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -420,9 +426,10 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
 
     /**
      * Helper method to insert new nodes with in a specific time range.
+     *
      * @param freeNodeToAddApp0 the free allocationNode the where the new allocation should be inserted
-     * @param start the start time of the new node
-     * @param end the end time of the new node
+     * @param start             the start time of the new node
+     * @param end               the end time of the new node
      * @return returns the newly inserted allocationNode which will be placed between (including) the start and end time
      */
     private AllocationNode insertNode(AllocationNode freeNodeToAddApp0, Instant start, Instant end) {
