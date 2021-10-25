@@ -28,7 +28,7 @@ public class TimelineTest {
         timelineWApps.addAppointment(TODAY, TestData.DATA0, TestData.T08_30);
         timelineWApps.addAppointment(TODAY, TestData.DATA4, TestData.T10_45);
         timelineWApps.addAppointment(TODAY, TestData.DATA6, TestData.T14_30);
-        timelineWApps.addAppointment(TODAY, TestData.DATA7, TestData.T16_00);
+        timelineWApps.addAppointment(TODAY, DATA7, T16_00);
         return timelineWApps;
     }
 
@@ -304,13 +304,14 @@ public class TimelineTest {
         Timeline timeline2 = getTimelineWithAppointments();
         Timeline timeline3 = getTimelineWithAppointments();
         timeline2.addAppointment(TODAY, DATA3, T10_30);
+        timeline2.addAppointment(TODAY, DATA3, T15_30);
         timeline3.addAppointment(TODAY, DATA1, T09_00);
         timeline3.addAppointment(TODAY, DATA1, T14_00);
         List<Timeline> otherTimelines = List.of(timeline2, timeline3);
         List<TimeSlot> freeSlots = timeline1.getMatchingFreeSlotsOfDuration(D30, otherTimelines);
-        Assumptions.assumeTrue(freeSlots.size() == 3);
         SoftAssertions.assertSoftly(s -> {
-            s.assertThat(freeSlots.get(0).getStart()).isEqualTo(TODAY.ofLocalTime(T09_00));
+            s.assertThat(freeSlots.size()).isEqualTo(3);
+            s.assertThat(freeSlots.get(0).getStart()).isEqualTo(TODAY.ofLocalTime(T09_30));
             s.assertThat(freeSlots.get(0).getEnd()).isEqualTo(TODAY.ofLocalTime(T10_30));
             s.assertThat(freeSlots.get(1).getStart()).isEqualTo(TODAY.ofLocalTime(T11_00));
             s.assertThat(freeSlots.get(1).getEnd()).isEqualTo(TODAY.ofLocalTime(T14_00));

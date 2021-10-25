@@ -358,8 +358,7 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
     public List<TimeSlot> getGapsFitting(Duration duration) {
         return stream()
                 .filter(allocationNode -> allocationNode.appData == null &&
-                        allocationNode.getDuration().equals(duration) ||
-                        duration.minus(allocationNode.getDuration()).isNegative())
+                        allocationNode.getDuration().compareTo(duration) >= 0)
                 .map(allocationNode -> (TimeSlot) allocationNode)
                 .collect(Collectors.toList());
     }
@@ -387,8 +386,7 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
     public List<TimeSlot> getGapsFittingReversed(Duration duration) {
         return reversedStream()
                 .filter(allocationNode -> allocationNode.appData == null &&
-                        allocationNode.getDuration().equals(duration) ||
-                        duration.minus(allocationNode.getDuration()).isNegative())
+                        allocationNode.getDuration().compareTo(duration) >= 0)
                 .map(allocationNode -> (TimeSlot) allocationNode)
                 .collect(Collectors.toList());
     }
@@ -427,9 +425,68 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
     public List<TimeSlot> getMatchingFreeSlotsOfDuration(Duration minLength, List<Timeline> other) {
         List<TimeSlot> finalTimeSlots = new ArrayList<>();
 
+        //Creating a list which for each timeline has a list of all free timeSlots
+        List<List<TimeSlot>> timelinesFreeSlots = new ArrayList<>();
+        timelinesFreeSlots.add(this.getGapsFitting(minLength));
+        other.forEach(timeline -> timelinesFreeSlots.add(timeline.getGapsFitting(minLength)));
 
+        //Continuing as long as there are free slots in each timeline
+        while (freeSlotsInAllTimelines(timelinesFreeSlots)) {
+            List<TimeSlot> firstSlots = getFirstSlots(timelinesFreeSlots);
+
+            //Getting the "startEdge"
+            Instant startEdge = firstSlots.stream().max(Comparator.comparing(TimeSlot::getStart)).get().getStart();
+
+            //Checking if there are slots to be eliminated before the start edge -> if so, start the process all over again
+            if (eliminateAllSlotsBefore(timelinesFreeSlots, startEdge)) {
+                continue;
+            }
+
+            //Getting the "endEdge"
+            Instant endEdge = firstSlots.stream().min(Comparator.comparing(TimeSlot::getEnd)).get().getEnd();
+
+            //if the duration between start and end edge is greater or equal to the minLength we can add a new TimeSLot to our finalTimeSlots list
+            if (Duration.between(startEdge, endEdge).compareTo(minLength) >= 0) {
+                finalTimeSlots.add(new TimeSlotImpl(startEdge, endEdge));
+            }
+
+            //Now just eliminate all the first end before or at the endEdge and continue
+            eliminateAllSlotsBefore(timelinesFreeSlots, endEdge);
+        }
 
         return finalTimeSlots;
+    }
+
+    //Helper method to check if there are any free slots in all the timelines
+    private boolean freeSlotsInAllTimelines(List<List<TimeSlot>> timelinesFreeSlots) {
+        for (List<TimeSlot> list: timelinesFreeSlots) {
+            if (list.isEmpty())
+                return false;
+        }
+        return true;
+    }
+
+    //Helper that returns a list of all first slots
+    private List<TimeSlot> getFirstSlots(List<List<TimeSlot>> timelinesFreeSlots) {
+        return timelinesFreeSlots.stream()
+                .map(list -> list.get(0))
+                .collect(Collectors.toList());
+    }
+
+    //Helper that removes all free slots that end before the given start time or at the given start time
+    private boolean eliminateAllSlotsBefore(List<List<TimeSlot>> timelinesFreeSlots, Instant start) {
+        boolean anySlotEliminated = false;
+        for (List<TimeSlot> timelineFreeSlots : timelinesFreeSlots) {
+            List<TimeSlot> toRemove = new ArrayList<>();
+            for (TimeSlot timeSlot : timelineFreeSlots) {
+                if (timeSlot.getEnd().compareTo(start) <= 0) {
+                    toRemove.add(timeSlot);
+                    anySlotEliminated = true;
+                }
+            }
+            timelineFreeSlots.removeAll(toRemove);
+        }
+        return anySlotEliminated;
     }
 
 
