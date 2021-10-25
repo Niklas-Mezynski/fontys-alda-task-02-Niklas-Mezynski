@@ -7,6 +7,7 @@ import java.time.Instant;
 import java.time.LocalTime;
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -172,8 +173,10 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
 
     private void printAllAppointments() {
         System.out.println("----Appointment list start---");
+        StringBuilder prefix = new StringBuilder();
         for (AllocationNode ad:this) {
-            System.out.println(ad);
+            System.out.println(prefix.toString() + ad);
+            prefix.append("\t");
         }
         System.out.println("----End---");
     }
@@ -314,7 +317,9 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
      */
     @Override
     public List<Appointment> findAppointments(Predicate<Appointment> filter) {
-        return null;
+        return appointmentStream()
+                .filter(filter)
+                .collect(Collectors.toList());
     }
 
     /**

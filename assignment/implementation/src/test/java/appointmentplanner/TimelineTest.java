@@ -220,6 +220,17 @@ public class TimelineTest {
         assertThat(timelineWithAppointments.getNrOfAppointments()).isEqualTo(3);
     }
 
+    @Test
+    void t13findAppointments() {
+        Timeline timelineWithAppointments = getTimelineWithAppointments();
+        Optional<Appointment> appointment1 = timelineWithAppointments.addAppointment(TODAY, DATA8, T09_00);
+        Optional<Appointment> appointment2 = timelineWithAppointments.addAppointment(TODAY, DATA8, T11_10);
+        Assumptions.assumeTrue(appointment1.isPresent() && appointment2.isPresent());
+        List<Appointment> appointments = timelineWithAppointments.findAppointments(appointment -> appointment.getAppointmentData().equals(DATA8));
+        SoftAssertions.assertSoftly(s -> {
+            s.assertThat(appointments).containsExactlyInAnyOrder(appointment1.get(), appointment2.get());
+        });
 
+    }
 
 }
