@@ -96,8 +96,7 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
                 //Find the earliest possible place for the appointment
                 Optional<AllocationNode> optFirstFreeNode = stream().filter(allocationNode ->
                         allocationNode.appData == null &&
-                                (allocationNode.start.plus(appointment.getDuration()).isBefore(allocationNode.end) ||
-                                        allocationNode.start.plus(appointment.getDuration()).equals(allocationNode.end))
+                                (allocationNode.start.plus(appointment.getDuration()).compareTo(allocationNode.end) <= 0                                )
                 ).findFirst();
                 if (optFirstFreeNode.isEmpty()) {
                     return Optional.empty();
@@ -113,8 +112,7 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
                 //Do the latest possible place for the appointment
                 Optional<AllocationNode> optLastFreeNode = reversedStream().filter(allocationNode ->
                         allocationNode.appData == null &&
-                                (allocationNode.end.minus(appointment.getDuration()).isAfter(allocationNode.start) ||
-                                        allocationNode.end.minus(appointment.getDuration()).equals(allocationNode.start))
+                                (allocationNode.end.minus(appointment.getDuration()).compareTo(allocationNode.start) >= 0)
                 ).findFirst();
                 if (optLastFreeNode.isEmpty()) {
                     return Optional.empty();
@@ -151,9 +149,8 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
         Optional<AllocationNode> first = stream()
                 .filter(allocationNode ->
                         allocationNode.getPurpose() == null &&
-                                (allocationNode.getStart().isBefore(startTimeInstant) || allocationNode.getStart().equals(startTimeInstant)) &&
-                                (allocationNode.getEnd().isAfter(endTimeInstant) || allocationNode.getEnd().equals(endTimeInstant))
-                )
+                                allocationNode.getStart().compareTo(startTimeInstant) <= 0 &&
+                                allocationNode.getEnd().compareTo(endTimeInstant) >= 0)
                 .findFirst();
 
         //IF the free slot was found -> Calling the insertNode() to rearrange the list and creating the appointment
@@ -208,7 +205,7 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
 
                 //Find the first free allocation node after the specified time, which fits the app duration
                 Optional<AllocationNode> first = stream().filter(allocationNode -> allocationNode.appData == null &&
-                                (allocationNode.start.isAfter(forDay.ofLocalTime(startTime)) || allocationNode.start.equals(forDay.ofLocalTime(startTime))) &&
+                                allocationNode.start.compareTo(forDay.ofLocalTime(startTime)) >= 0 &&
                                 allocationNode.getDuration().compareTo(appointment.getDuration()) >= 0)
                         .findFirst();
 
@@ -227,7 +224,7 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
 
                 //Find the first free allocation node before the specified time, which fits the app duration
                 Optional<AllocationNode> first1 = reversedStream().filter(allocationNode -> allocationNode.appData == null &&
-                                (allocationNode.end.isBefore(forDay.ofLocalTime(startTime)) || allocationNode.end.equals(forDay.ofLocalTime(startTime))) &&
+                                allocationNode.end.compareTo(forDay.ofLocalTime(startTime)) <= 0 &&
                                 allocationNode.getDuration().compareTo(appointment.getDuration()) >= 0)
                         .findFirst();
 
