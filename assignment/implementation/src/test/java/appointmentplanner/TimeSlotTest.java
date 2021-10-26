@@ -1,6 +1,8 @@
 package appointmentplanner;
 
 import appointmentplanner.api.AbstractAPFactory;
+import appointmentplanner.api.AppointmentRequest;
+import appointmentplanner.api.TimePreference;
 import appointmentplanner.api.TimeSlot;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
@@ -34,6 +36,15 @@ public class TimeSlotTest {
         Instant instantToday16_00 = localDateTimeToday16_00.atZone(ZoneId.systemDefault()).toInstant();
         assertThatCode(() -> fac.between(instantToday16_00, instantToday09_00))
                 .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void t03testEqualsAndHashcode() {
+        TimeSlotImpl ts1 = new TimeSlotImpl(TestData.TODAY.ofLocalTime(TestData.T09_30), TestData.TODAY.ofLocalTime(TestData.T10_30));
+        TimeSlotImpl ts2 = new TimeSlotImpl(TestData.TODAY.ofLocalTime(TestData.T09_30), TestData.TODAY.ofLocalTime(TestData.T10_30));
+        TimeSlotImpl ts3 = new TimeSlotImpl(TestData.TODAY.ofLocalTime(TestData.T10_00), TestData.TODAY.ofLocalTime(TestData.T10_30));
+        TimeSlotImpl ts4 = new TimeSlotImpl(TestData.TODAY.ofLocalTime(TestData.T09_30), TestData.TODAY.ofLocalTime(TestData.T11_10));
+        TestData.verifyEqualsAndHashCode(ts1,ts2,ts3,ts4);
     }
 
 }

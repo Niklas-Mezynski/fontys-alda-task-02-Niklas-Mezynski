@@ -30,4 +30,14 @@ public class AppointmentRequestTest {
 //            s.assertThat(appointmentRequest1.getStart()).isEqualTo();
         });
     }
+
+    @Test
+    void t02testEqualsAndHashcode() {
+        AppointmentRequest ar1 = new AppointmentRequestImpl(TestData.DATA1, TestData.T09_00, TimePreference.UNSPECIFIED);
+        AppointmentRequest ar2 = new AppointmentRequestImpl(TestData.DATA1, TestData.T09_00, TimePreference.UNSPECIFIED);
+        AppointmentRequest ar3 = new AppointmentRequestImpl(TestData.DATA1, TestData.T09_00, TimePreference.LATEST);
+        AppointmentRequest ar4 = new AppointmentRequestImpl(TestData.DATA1, TestData.T16_00, TimePreference.UNSPECIFIED);
+        AppointmentRequest ar5 = new AppointmentRequestImpl(TestData.DATA5, TestData.T09_00, TimePreference.UNSPECIFIED);
+        TestData.verifyEqualsAndHashCode(ar1,ar2,ar3,ar4,ar5);
+    }
 }

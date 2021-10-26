@@ -3,6 +3,7 @@ package appointmentplanner;
 import appointmentplanner.api.TimeSlot;
 
 import java.time.Instant;
+import java.util.Objects;
 
 public class TimeSlotImpl implements TimeSlot {
     private final Instant start;
@@ -35,5 +36,18 @@ public class TimeSlotImpl implements TimeSlot {
     @Override
     public Instant getEnd() {
         return end;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TimeSlotImpl timeSlot = (TimeSlotImpl) o;
+        return Objects.equals(start, timeSlot.start) && Objects.equals(end, timeSlot.end);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(start, end);
     }
 }

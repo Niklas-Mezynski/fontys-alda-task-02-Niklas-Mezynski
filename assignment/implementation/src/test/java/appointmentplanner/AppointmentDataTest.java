@@ -35,4 +35,14 @@ public class AppointmentDataTest {
                     .isInstanceOf(IllegalArgumentException.class);
         });
     }
+
+    @Test
+    void t03testEqualsAndHashcode() {
+        AppointmentDataImpl appData1 = new AppointmentDataImpl("Snens", Duration.ofHours(2));
+        AppointmentDataImpl appData2 = new AppointmentDataImpl("Snens", Duration.ofHours(2));
+        AppointmentDataImpl appData3 = new AppointmentDataImpl("Huhn", Duration.ofHours(2));
+        AppointmentDataImpl appData4 = new AppointmentDataImpl("Snens", Duration.ofHours(3));
+        AppointmentDataImpl appData5 = new AppointmentDataImpl("Snens", Duration.ofHours(2), Priority.HIGH);
+        TestData.verifyEqualsAndHashCode(appData1, appData2, appData3, appData4, appData5);
+    }
 }
