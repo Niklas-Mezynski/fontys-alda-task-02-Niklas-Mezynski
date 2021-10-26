@@ -1,13 +1,14 @@
 package appointmentplanner;
 
 import appointmentplanner.api.AbstractAPFactory;
+import appointmentplanner.api.LocalDay;
 import appointmentplanner.api.LocalDayPlan;
+import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.*;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
+import java.time.*;
 
 public class LocalDayPlanTest {
 
@@ -32,6 +33,17 @@ public class LocalDayPlanTest {
             s.assertThat(localDayPlan2.earliest()).isEqualTo(today09_00);
             s.assertThat(localDayPlan2.tooLate()).isEqualTo(today16_00);
         });
+    }
+
+    @Test
+    void t02toString() {
+        Instant instant08_30 = LocalDateTime.of(2020, 4, 20, 8, 30).atZone(ZoneId.of("Europe/Berlin")).toInstant();
+        Instant instant17_00 = LocalDateTime.of(2020, 4, 20, 17, 0).atZone(ZoneId.of("Europe/Berlin")).toInstant();
+        LocalDayPlan localDayPlan = fac.createLocalDayPlan(new LocalDay(ZoneId.of("Europe/Berlin"), LocalDate.of(2020, 4, 20)), instant08_30, instant17_00);
+        localDayPlan.addAppointment(TestData.DATA1, TestData.T09_00); //30 min
+        localDayPlan.addAppointment(TestData.DATA2, TestData.T10_30); //30 min
+        localDayPlan.addAppointment(TestData.DATA3, TestData.T14_00); //15 min
+        assertThat(localDayPlan.toString()).contains("2020-04-20", "09:00", "09:30", "10:30", "11:00", "14:00", "14:15");
     }
 
 }

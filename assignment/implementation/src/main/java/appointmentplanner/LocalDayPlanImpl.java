@@ -1,11 +1,15 @@
 package appointmentplanner;
 
+import appointmentplanner.api.Appointment;
 import appointmentplanner.api.LocalDay;
 import appointmentplanner.api.LocalDayPlan;
 import appointmentplanner.api.Timeline;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.TemporalAmount;
+import java.util.List;
 
 public class LocalDayPlanImpl implements LocalDayPlan {
 
@@ -59,5 +63,19 @@ public class LocalDayPlanImpl implements LocalDayPlan {
     @Override
     public Timeline getTimeline() {
         return timeline;
+    }
+
+    @Override
+    public String toString() {
+        List<Appointment> appointments = getAppointments();
+        StringBuilder sb = new StringBuilder();
+        int i = 1;
+        for (Appointment appointment : appointments) {
+            LocalDateTime start = LocalDateTime.ofInstant(appointment.getStart(), day.getZone());
+            LocalDateTime end = LocalDateTime.ofInstant(appointment.getEnd(), day.getZone());
+            sb.append("Appointment ").append(i).append("-> start=").append(start).append(" | end=").append(end).append("\n");
+            i++;
+        }
+        return sb.toString();
     }
 }
