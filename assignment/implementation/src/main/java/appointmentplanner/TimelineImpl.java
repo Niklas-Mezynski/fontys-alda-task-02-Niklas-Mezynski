@@ -192,14 +192,15 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
      */
     @Override
     public Optional<Appointment> addAppointment(LocalDay forDay, AppointmentData appointment, LocalTime startTime, TimePreference fallback) {
-        if (fallback == TimePreference.EARLIEST || fallback == TimePreference.LATEST) {
-            return addAppointment(forDay, appointment, fallback);
-        }
-
         //Try to add the appointment at the fixed time
         Optional<Appointment> appWFixedTime = addAppointment(forDay, appointment, startTime);
         if (appWFixedTime.isPresent()) {
             return appWFixedTime;
+        }
+
+        //When fallback time preference is earliest or latest, just use the  method above
+        if (fallback == TimePreference.EARLIEST || fallback == TimePreference.LATEST) {
+            return addAppointment(forDay, appointment, fallback);
         }
 
         //If the appointment can't be added at the fixed timeslot, try to use the fallback time preference
