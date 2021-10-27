@@ -168,16 +168,6 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
         return Optional.empty();
     }
 
-    private void printAllAppointments() {
-        System.out.println("----Appointment list start---");
-        StringBuilder prefix = new StringBuilder();
-        for (AllocationNode ad : this) {
-            System.out.println(prefix.toString() + ad);
-            prefix.append("\t");
-        }
-        System.out.println("----End---");
-    }
-
     /**
      * Add appointment with a fixed time. If the requested slot is available,
      * that is used and the appointment is returned. Otherwise the fall back
@@ -495,40 +485,43 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
     /**
      * Helper method to insert new nodes with in a specific time range.
      *
-     * @param freeNodeToAddApp0 the free allocationNode the where the new allocation should be inserted
+     * @param node1 the free allocationNode the where the new allocation should be inserted
      * @param start             the start time of the new node
      * @param end               the end time of the new node
      * @return returns the newly inserted allocationNode which will be placed between (including) the start and end time
      */
-    private AllocationNode insertNode(AllocationNode freeNodeToAddApp0, Instant start, Instant end) {
-        //Creating two new nodes so that we can split the freeNodeToAddApp0 into
-        // a free node, then the allocated node and in the end a new free node
-        AllocationNode newAllocation1 = new AllocationNode(start, end);
-        AllocationNode newFreeAllocationNodeAfter2 = new AllocationNode(newAllocation1.end, freeNodeToAddApp0.end);
+    private AllocationNode insertNode(AllocationNode node1, Instant start, Instant end) {
+        //Creating two new nodes left and right of the node where the app shall be inserted
+        AllocationNode node0 = new AllocationNode(node1.start, start);
+        AllocationNode node2 = new AllocationNode(end, node1.end);
 
-        //Rearanging the linked list structure
-        newFreeAllocationNodeAfter2.next = freeNodeToAddApp0.next;
-        newFreeAllocationNodeAfter2.prev = newAllocation1;
-        newAllocation1.next = newFreeAllocationNodeAfter2;
-        newAllocation1.prev = freeNodeToAddApp0;
-        freeNodeToAddApp0.next = newAllocation1;
+        //Rearranging the linked list structure
+        node0.prev = node1.prev;
+        node0.prev.next = node0;
+        node0.next = node1;
+        node2.next = node1.next;
+        node2.next.prev = node2;
+        node2.prev = node1;
+        node1.prev = node0;
+        node1.next = node2;
 
-        //Setting the correct start and end times for the new Nodes
-        freeNodeToAddApp0.end = newAllocation1.start;
+        //Setting start and end time of middle node
+        node1.start = node0.end;
+        node1.end = node2.start;
 
         //Checking if the free timeslot on the left side has a duration of 0 and deleting it if necessary
-        if (freeNodeToAddApp0.getDuration().equals(Duration.ZERO)) {
-            freeNodeToAddApp0.prev.next = newAllocation1;
-            newAllocation1.prev = freeNodeToAddApp0.prev;
+        if (node0.getDuration().equals(Duration.ZERO)) {
+            node1.prev = node0.prev;
+            node1.prev.next = node1;
         }
 
         //Checking if the free timeslot on the right side has a duration of 0 and deleting it if necessary
-        if (newFreeAllocationNodeAfter2.getDuration().equals(Duration.ZERO)) {
-            newAllocation1.next = newFreeAllocationNodeAfter2.next;
-            newAllocation1.next.prev = newAllocation1;
+        if (node2.getDuration().equals(Duration.ZERO)) {
+            node1.next = node2.next;
+            node1.next.prev = node1;
         }
 
-        return newAllocation1;
+        return node1;
     }
 
     /**

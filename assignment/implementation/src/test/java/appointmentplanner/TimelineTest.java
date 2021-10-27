@@ -335,4 +335,18 @@ public class TimelineTest {
         });
     }
 
+    @Test
+    void t21someTestingStuff() {
+        TimelineImpl timeline = new TimelineImpl(TODAY.ofLocalTime(T09_00), TODAY.ofLocalTime(T10_30));
+        timeline.addAppointment(TODAY, DATA1, TimePreference.EARLIEST);
+        timeline.addAppointment(TODAY, DATA1, TimePreference.EARLIEST);
+//        System.out.println("HUHN");
+//        timeline.printAllAppointments();
+//        System.out.println("----");
+        timeline.addAppointment(TODAY, DATA1, TimePreference.LATEST);
+//        System.out.println("----");
+//        timeline.printAllAppointments();
+        assertThat(timeline.getNrOfAppointments()).isEqualTo(3);
+    }
+
 }
