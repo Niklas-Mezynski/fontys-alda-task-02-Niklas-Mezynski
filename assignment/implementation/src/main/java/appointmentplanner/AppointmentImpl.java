@@ -7,6 +7,7 @@ import appointmentplanner.api.Priority;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Objects;
 
 public class AppointmentImpl implements Appointment {
 
@@ -53,5 +54,18 @@ public class AppointmentImpl implements Appointment {
     @Override
     public Instant getEnd() {
         return end;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AppointmentImpl that = (AppointmentImpl) o;
+        return Objects.equals(start, that.start) && Objects.equals(end, that.end) && Objects.equals(appReq, that.appReq);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(start, end, appReq);
     }
 }
