@@ -68,6 +68,9 @@ public class LocalDayPlanImpl implements LocalDayPlan {
     @Override
     public String toString() {
         List<Appointment> appointments = getAppointments();
+        if (appointments.isEmpty()) {
+            return "There are no appointments for this day";
+        }
         StringBuilder sb = new StringBuilder();
         int i = 1;
         for (Appointment appointment : appointments) {

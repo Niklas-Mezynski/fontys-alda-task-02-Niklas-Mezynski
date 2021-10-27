@@ -46,4 +46,12 @@ public class LocalDayPlanTest {
         assertThat(localDayPlan.toString()).contains("2020-04-20", "09:00", "09:30", "10:30", "11:00", "14:00", "14:15");
     }
 
+    @Test
+    void t03toStringWithoutAnyApps() {
+        Instant instant08_30 = LocalDateTime.of(2020, 4, 20, 8, 30).atZone(ZoneId.of("Europe/Berlin")).toInstant();
+        Instant instant17_00 = LocalDateTime.of(2020, 4, 20, 17, 0).atZone(ZoneId.of("Europe/Berlin")).toInstant();
+        LocalDayPlan localDayPlan = fac.createLocalDayPlan(new LocalDay(ZoneId.of("Europe/Berlin"), LocalDate.of(2020, 4, 20)), instant08_30, instant17_00);
+        assertThat(localDayPlan.toString()).isEqualTo("There are no appointments for this day");
+    }
+
 }
