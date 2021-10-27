@@ -19,8 +19,8 @@ public class TimelineImpl implements Timeline, Iterable<TimelineImpl.AllocationN
     private int nrOfAppointments;
 
     public TimelineImpl(Instant start, Instant end) {
-        if (!start.isBefore(end))
-            throw new IllegalArgumentException("start time must be before end time");
+        if (end.isBefore(start))
+            throw new IllegalArgumentException("end time can't be before start time");
 
         this.nrOfAppointments = 0;
         this.head = new AllocationNode(start, start);

@@ -130,7 +130,22 @@ public class TimelineTest {
             s.assertThat(appointment.get().getStart()).isEqualTo(expectedStart);
             s.assertThat(appointment.get().getRequest().getTimePreference()).isEqualTo(timePreference);
         });
+    }
 
+    @Test
+    void t051addMultipleAppointmentsAtOnce() {
+        Timeline timeline = getTimelineWithAppointments();
+        Optional<Appointment> appointment1 = timeline.addAppointment(TODAY, DATA1, TimePreference.EARLIEST);
+        Optional<Appointment> appointment2 = timeline.addAppointment(TODAY, DATA2, TimePreference.EARLIEST);
+        Optional<Appointment> appointment3 = timeline.addAppointment(TODAY, DATA1, TimePreference.LATEST);
+        Assumptions.assumeTrue(appointment1.isPresent());
+        Assumptions.assumeTrue(appointment2.isPresent());
+        Assumptions.assumeTrue(appointment3.isPresent());
+        SoftAssertions.assertSoftly(s -> {
+            s.assertThat(appointment1.get().getStart()).isEqualTo(TODAY.ofLocalTime(T09_00));
+            s.assertThat(appointment2.get().getStart()).isEqualTo(TODAY.ofLocalTime(T09_30));
+            s.assertThat(appointment3.get().getStart()).isEqualTo(TODAY.ofLocalTime(T15_30));
+        });
     }
 
     @CsvSource({
